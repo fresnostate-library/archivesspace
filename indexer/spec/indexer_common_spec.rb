@@ -25,10 +25,10 @@ describe "indexer common" do
       expect(@ic.instance_variable_get(:@current_session)).to be_nil
     end
     it "initializes @extra_documents_hooks to nil" do
-      expect(@ic.instance_variable_get(:@extra_documents_hooks)).to_not be_nil
+      expect(@ic.instance_variable_get(:@extra_documents_hooks)).not_to be_nil
     end
     it "initializes @document_prepare_hooks to nil" do
-      expect(@ic.instance_variable_get(:@document_prepare_hooks)).to_not be_nil
+      expect(@ic.instance_variable_get(:@document_prepare_hooks)).not_to be_nil
     end
     it "initializes @@records_with_children to an empty array" do
       expect(IndexerCommon.class_variable_get(:@@records_with_children)).to include("collection_management")
@@ -59,7 +59,7 @@ describe "indexer common" do
   describe "add_attribute_to_resolve" do
     describe "additional attribute not already on resolved_attributes list" do
       it "adds additional attribute to resolve list" do
-        expect(IndexerCommon.class_variable_get(:@@resolved_attributes)).to_not include('test_attr')
+        expect(IndexerCommon.class_variable_get(:@@resolved_attributes)).not_to include('test_attr')
         expect(IndexerCommon.class_variable_get(:@@resolved_attributes).length).to eq(19)
         IndexerCommon.add_attribute_to_resolve('test_attr')
         expect(IndexerCommon.class_variable_get(:@@resolved_attributes)).to include('test_attr')
@@ -341,10 +341,14 @@ describe "indexer common" do
     end
   end
   describe "do_http_request" do
-    it "does http request" do
-      # def do_http_request(url, req)
+    it "should report if there's a timeout but not fail" do
+      solr_url = @ic.solr_url
+      req = Net::HTTP::Post.new("#{solr_url.path}/update")
+      ASHTTP.should_receive(:start_uri).and_raise(Timeout::Error)
+      @ic.do_http_request(solr_url, req)
     end
   end
+
   describe "reset_session" do
     it "resets the session" do
       # def reset_session
@@ -396,8 +400,9 @@ describe "indexer common" do
     end
   end
   describe "send_commit" do
-    it "send commit" do
-      # def send_commit(type = :hard)
+    it "report if there's a timeout but not fail" do
+      ASHTTP.should_receive(:start_uri).and_raise(Timeout::Error)
+      @ic.send_commit
     end
   end
   describe "paused?" do

@@ -33,6 +33,9 @@
         <% else %>
           <%= form.label_with_field "ref_id", form.hidden_input("ref_id") + "<span class='identifier-display'><span class='identifier-display-part'>#{form.obj["ref_id"]}</span></span>".html_safe %>
         <% end %>
+
+        <%= render_aspace_partial :partial => "shared/slug", :locals => {:form => form, :record_type => @archival_object} if AppConfig[:use_human_readable_URLs] %>
+
         <%= form.hidden_input "ref_id" %>
         <%= form.label_and_textfield("component_id")%>
         <%= form.label_and_select "level", form.possible_options_for("level", true) %>
@@ -54,7 +57,7 @@
   <% end %>
 
   <% form.emit_template("archival_object") %>
-  
+
   <%= render_aspace_partial :partial => "shared/subrecord_form", :locals => {:form => form, :name => "dates", :required => :conditionally, :template => "archival_record_date"} %>
   <%= render_aspace_partial :partial => "shared/subrecord_form", :locals => {:form => form, :name => "extents"} %>
 

@@ -11,8 +11,7 @@
 ##
 
 # Set your database name and credentials here.  Example:
-#
-#AppConfig[:db_url] = "jdbc:mysql://127.0.0.1:3306/aspace?useUnicode=true&characterEncoding=UTF-8&user=as&password=as123"
+# AppConfig[:db_url] = "jdbc:mysql://localhost:3306/archivesspace?user=as&password=as123&useUnicode=true&characterEncoding=UTF-8"
 #
 AppConfig[:db_url] = proc { AppConfig.demo_db_url }
 
@@ -79,14 +78,15 @@ AppConfig[:solr_backup_number_to_keep] = 1
 AppConfig[:solr_backup_directory] = proc { File.join(AppConfig[:data_directory], "solr_backups") }
 # add default solr params, i.e. use AND for search: AppConfig[:solr_params] = { "q.op" => "AND" }
 # Another example below sets the boost query value (bq) to boost the relevancy for the query string in the title,
-# sets the phrase fields parameter (pf) to boost the relevancy for the title when the query terms are in close proximity to 
+# sets the phrase fields parameter (pf) to boost the relevancy for the title when the query terms are in close proximity to
 # each other, and sets the phrase slop (ps) parameter for the pf parameter to indicate how close the proximity should be
 #  AppConfig[:solr_params] = {
 #      "bq" => proc { "title:\"#{@query_string}\"*" },
 #      "pf" => 'title^10',
 #      "ps" => 0,
 #    }
-AppConfig[:solr_params] = {}
+# Configuring search operator to be AND by default - ANW-427
+AppConfig[:solr_params] = { "q.op" => "AND" }
 
 # Set the application's language (see the .yml files in
 # https://github.com/archivesspace/archivesspace/tree/master/common/locales for
@@ -97,15 +97,20 @@ AppConfig[:locale] = :en
 AppConfig[:plugins] = ['local',  'lcnaf']
 
 # The number of concurrent threads available to run background jobs
-# Introduced for AR-1619 - long running jobs were blocking the queue
-# Resist the urge to set this to a big number!
+# Resist the urge to set this to a big number as it will affect performance
 AppConfig[:job_thread_count] = 2
 
-# OAI configuration options
-AppConfig[:oai_repository_name] = 'ArchivesSpace OAI Provider'
 AppConfig[:oai_proxy_url] = 'http://your-public-oai-url.example.com'
-AppConfig[:oai_record_prefix] = 'oai:archivesspace'
+
+# DEPRECATED OAI Settings: Moved to database in ANW-674
+# NOTE: As of release 2.5.2, these settings should be set in the Staff User interface
+# To change these settings, select Manage OAI-PMH Settings from the System menu in the staff interface
+# These three settings are at the top of the page in the General Settings section
+# These settings will be removed from the config file completely when version 2.6.0 is released
 AppConfig[:oai_admin_email] = 'admin@example.com'
+AppConfig[:oai_record_prefix] = 'oai:archivesspace'
+AppConfig[:oai_repository_name] = 'ArchivesSpace OAI Provider'
+
 
 # In addition to the sets based on level of description, you can define OAI Sets
 # based on repository codes and/or sponsors as follows
@@ -122,6 +127,8 @@ AppConfig[:oai_admin_email] = 'admin@example.com'
 #   },
 # }
 
+AppConfig[:oai_ead_options] = {}
+# alternate example:  AppConfig[:oai_ead_options] = { :include_daos => true, :use_numbered_c_tags => true }
 
 ##
 ## Other less commonly changed settings are below
@@ -145,6 +152,10 @@ AppConfig[:solr_facet_limit] = 100
 
 AppConfig[:default_page_size] = 10
 AppConfig[:max_page_size] = 250
+
+# An option to change the length of the abstracts on the collections overview page
+# If your Scope & Contents notes are very long you can increase this to show more
+AppConfig[:abstract_note_length] = 500
 
 # A prefix added to cookies used by the application.
 #
@@ -271,6 +282,9 @@ AppConfig[:report_page_layout] = "letter"
 AppConfig[:report_pdf_font_paths] = proc { ["#{AppConfig[:backend_url]}/reports/static/fonts/dejavu/DejaVuSans.ttf"] }
 AppConfig[:report_pdf_font_family] = "\"DejaVu Sans\", sans-serif"
 
+# Path to system Java -- required when creating PDFs on Windows
+AppConfig[:path_to_java] = "java"
+
 # By default, the plugins directory will be in your ASpace Home.
 # If you want to override that, update this with an absolute
 # path
@@ -313,9 +327,10 @@ AppConfig[:max_location_range] = 1000
 # this check here. Do so at your own peril.
 AppConfig[:ignore_schema_info_check] = false
 
-# This is a URL that points to some demo data that can be used for testing,
-# teaching, etc. To use this, set an OS environment variable of ASPACE_DEMO = true
-AppConfig[:demo_data_url] = "https://s3-us-west-2.amazonaws.com/archivesspacedemo/latest-demo-data.zip"
+# To use this, set an OS environment variable of ASPACE_DEMO = true
+# This is the configuration variable to point to some demo data for use in testing,
+# teaching, etc.
+AppConfig[:demo_data_url] = ""
 
 # Expose external ids in the frontend
 AppConfig[:show_external_ids] = false
@@ -328,10 +343,34 @@ AppConfig[:show_external_ids] = false
 AppConfig[:jetty_response_buffer_size_bytes] = 64 * 1024
 AppConfig[:jetty_request_buffer_size_bytes] = 64 * 1024
 
+# Container Management Configuration Settings
+#
+# :container_management_barcode_length defines global and repo-level barcode validations
+# (validating on length only).  Barcodes that have either no value, or a value between :min
+# and :max, will validate on save.  Set global constraints via :system_default, and use
+# the repo_code value for repository-level constraints.  Note that :system_default will
+# always inherit down its values when possible.
+#
+# Example:
+# AppConfig[:container_management_barcode_length] = {:system_default => {:min => 5, :max => 10}, 'repo' => {:min => 9, :max => 12}, 'other_repo' => {:min => 9, :max => 9} }
+
+# :container_management_extent_calculator globally defines the behavior of the exent calculator.
+# Use :report_volume (true/false) to define whether space should be reported in cubic
+# or linear dimensions.
+# Use :unit (:feet, :inches, :meters, :centimeters) to define the unit which the calculator
+# reports extents in.
+# Use :decimal_places to define how many decimal places the calculator should return.
+#
+# Example:
+# AppConfig[:container_management_extent_calculator] = { :report_volume => true, :unit => :feet, :decimal_places => 3 }
+
+# Public User Interface (PUI) Settings
+#
+# PUI Inheritance
 # Define the fields for a record type that are inherited from ancestors
 # if they don't have a value in the record itself.
 # This is used in common/record_inheritance.rb and was developed to support
-# the new public UI application.
+# the public UI application.
 # Note - any changes to record_inheritance config will require a reindex of pui
 # records to take affect. To do this remove files from indexer_pui_state
 AppConfig[:record_inheritance] = {
@@ -435,18 +474,18 @@ AppConfig[:record_inheritance] = {
 #    :inherit_directly => false
 #  },
 
-# PUI Configurations
+# PUI General Configurations
 # TODO: Clean up configuration options
 
 AppConfig[:pui_search_results_page_size] = 10
 AppConfig[:pui_branding_img] = 'archivesspace.small.png'
-AppConfig[:pui_block_referrer] = true # patron privacy; blocks full 'referer' when going outside the domain
+AppConfig[:pui_block_referrer] = true # patron privacy; blocks full 'referrer' when going outside the domain
 AppConfig[:pui_enable_staff_link] = true # attempt to add a link back to the staff interface
 
-# The number of PDFs we'll generate (in the background) at the same time.
+# The number of PDFs that can be generated (in the background) at the same time.
 #
-# PDF generation can be a little memory intensive for large collections, so we
-# set this fairly low out of the box.
+# PDF generation can be a little memory intensive for large collections, so this is
+# set fairly low out of the box.
 AppConfig[:pui_max_concurrent_pdfs] = 2
 # You can set this to nil or zero to prevent a timeout
 AppConfig[:pui_pdf_timeout] = 600
@@ -462,7 +501,7 @@ AppConfig[:pui_hide][:agents] = false
 AppConfig[:pui_hide][:classifications] = false
 AppConfig[:pui_hide][:search_tab] = false
 # The following determine globally whether the various "badges" appear on the Repository page
-# can be overriden at repository level below (e.g.:  AppConfig[:repos][{repo_code}][:hide][:counts] = true
+# can be overriden at repository level below (e.g.:  AppConfig[:pui_repos][{repo_code}][:hide][:counts] = true
 AppConfig[:pui_hide][:resource_badge] = false
 AppConfig[:pui_hide][:record_badge] = true # hide by default
 AppConfig[:pui_hide][:digital_object_badge] = false
@@ -477,7 +516,20 @@ AppConfig[:pui_hide][:container_inventory] = false
 # Don't display the accession ("unprocessed material") link on the main navigation menu
 # AppConfig[:pui_hide][:accessions] = true
 
-# the following determine when the request button is displayed
+# Whether to display linked decaccessions
+AppConfig[:pui_display_deaccessions] = true
+
+#The number of characters to truncate before showing the 'Read More' link on notes
+AppConfig[:pui_readmore_max_characters] = 450
+
+# Enable / disable PUI resource/archival object page actions
+AppConfig[:pui_page_actions_cite] = true
+AppConfig[:pui_page_actions_bookmark] = true
+AppConfig[:pui_page_actions_request] = true
+AppConfig[:pui_page_actions_print] = true
+
+# PUI Request Function (used when AppConfig[:pui_page_actions_request] = true)
+# the following determine on what kinds of records the request button is displayed
 AppConfig[:pui_requests_permitted_for_types] = [:resource, :archival_object, :accession, :digital_object, :digital_object_component]
 AppConfig[:pui_requests_permitted_for_containers_only] = false # set to 'true' if you want to disable if there is no top container
 
@@ -490,50 +542,6 @@ AppConfig[:pui_repos] = {}
 # AppConfig[:pui_repos]['foo'][:request_email] = {email address} # the email address to send any repository requests
 # AppConfig[:pui_repos]['foo'][:hide] = {}
 # AppConfig[:pui_repos]['foo'][:hide][:counts] = true
-
-AppConfig[:pui_display_deaccessions] = true
-
-# Enable / disable PUI resource/archival object page actions
-AppConfig[:pui_page_actions_cite] = true
-AppConfig[:pui_page_actions_bookmark] = true
-AppConfig[:pui_page_actions_request] = true
-AppConfig[:pui_page_actions_print] = true
-
-# Add page actions via the configuration
-AppConfig[:pui_page_custom_actions] = []
-# Examples:
-# Javascript action example:
-# AppConfig[:pui_page_custom_actions] << {
-#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
-#   'label' => 'actions.do_something', # the I18n path for the action button
-#   'icon' => 'fa-paw', # the font-awesome icon CSS class
-#   'onclick_javascript' => 'alert("do something grand");',
-# }
-# # Hyperlink action example:
-# AppConfig[:pui_page_custom_actions] << {
-#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
-#   'label' => 'actions.do_something', # the I18n path for the action button
-#   'icon' => 'fa-paw', # the font-awesome icon CSS class
-#   'url_proc' => proc {|record| 'http://example.com/aspace?uri='+record.uri},
-# }
-# # Form-POST action example:
-# AppConfig[:pui_page_custom_actions] << {
-#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
-#   'label' => 'actions.do_something', # the I18n path for the action button
-#   'icon' => 'fa-paw', # the font-awesome icon CSS class
-#   # 'post_params_proc' returns a hash of params which populates a form with hidden inputs ('name' => 'value')
-#   'post_params_proc' => proc {|record| {'uri' => record.uri, 'display_string' => record.display_string} },
-#   # 'url_proc' returns the URL for the form to POST to
-#   'url_proc' => proc {|record| 'http://example.com/aspace?uri='+record.uri},
-#   # 'form_id' as string to be used as the form's ID
-#   'form_id' => 'my_grand_action',
-# }
-# # ERB action example:
-# AppConfig[:pui_page_custom_actions] << {
-#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
-#   # 'erb_partial' returns the path to an erb template from which the action will be rendered
-#   'erb_partial' => 'shared/my_special_action',
-# }
 
 # PUI email settings (logs emails when disabled)
 AppConfig[:pui_email_enabled] = false
@@ -571,5 +579,50 @@ AppConfig[:pui_request_use_repo_email] = false
 #AppConfig[:pui_email_perform_deliveries] = true
 #AppConfig[:pui_email_raise_delivery_errors] = true
 
-#The number of characters to truncate before showing the 'Read More' link on notes
-AppConfig[:pui_readmore_max_characters] = 450
+# Add page actions via the configuration
+AppConfig[:pui_page_custom_actions] = []
+# Examples:
+# Javascript action example:
+# AppConfig[:pui_page_custom_actions] << {
+#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
+#   'label' => 'actions.do_something', # the I18n path for the action button
+#   'icon' => 'fa-paw', # the font-awesome icon CSS class
+#   'onclick_javascript' => 'alert("do something grand");',
+# }
+# # Hyperlink action example:
+# AppConfig[:pui_page_custom_actions] << {
+#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
+#   'label' => 'actions.do_something', # the I18n path for the action button
+#   'icon' => 'fa-paw', # the font-awesome icon CSS class
+#   'url_proc' => proc {|record| 'http://example.com/aspace?uri='+record.uri},
+# }
+# # Form-POST action example:
+# AppConfig[:pui_page_custom_actions] << {
+#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
+#   'label' => 'actions.do_something', # the I18n path for the action button
+#   'icon' => 'fa-paw', # the font-awesome icon CSS class
+#   # 'post_params_proc' returns a hash of params which populates a form with hidden inputs ('name' => 'value')
+#   'post_params_proc' => proc {|record| {'uri' => record.uri, 'display_string' => record.display_string} },
+#   # 'url_proc' returns the URL for the form to POST to
+#   'url_proc' => proc {|record| 'http://example.com/aspace?uri='+record.uri},
+#   # 'form_id' as string to be used as the form's ID
+#   'form_id' => 'my_grand_action',
+# }
+# # ERB action example:
+# AppConfig[:pui_page_custom_actions] << {
+#   'record_type' => ['resource', 'archival_object'], # the jsonmodel type to show for
+#   # 'erb_partial' returns the path to an erb template from which the action will be rendered
+#   'erb_partial' => 'shared/my_special_action',
+# }
+
+AppConfig[:use_human_readable_URLs] = true
+
+# Use the repository in slug based URLs
+# Warning: setting repo_slug_in_URL to true when it has previously been set to false will break links, unless all slugs are regenerated.
+AppConfig[:repo_slug_in_URL] = false
+
+# Autogenerate slugs based on IDs. If this is set to false, then slugs will autogenerate based on name.
+AppConfig[:auto_generate_slugs_with_id] = false
+
+# For Resources: if this option and auto_generate_slugs_with_id are both enabled, then slugs for Resources will be generated with EADID instead of the identifier.
+AppConfig[:generate_resource_slugs_with_eadid] = false

@@ -47,7 +47,7 @@ module ExportHelpers
   end
 
 
-  def generate_mets(id)
+  def generate_mets(id, dmd = "mods")
     digital_object = DigitalObject.get_or_die(id)
     obj = resolve_references(DigitalObject.to_jsonmodel(digital_object),
                              ['repository::agent_representation', 'linked_agents', 'subjects'])
@@ -57,7 +57,7 @@ module ExportHelpers
     # get this data out?
     mets = ASpaceExport.model(:mets).from_digital_object(JSONModel(:digital_object).new(obj),
                                                          digital_object.tree(:all))
-    ASpaceExport::serialize(mets)
+    ASpaceExport::serialize(mets, {:dmd => dmd})
   end
 
 
@@ -71,9 +71,15 @@ module ExportHelpers
   end
 
 
-  def generate_marc(id)
+  def generate_marc(id, include_unpublished = false)
     obj = resolve_references(Resource.to_jsonmodel(id), ['repository', 'linked_agents', 'subjects'])
-    marc = ASpaceExport.model(:marc21).from_resource(JSONModel(:resource).new(obj))
+
+    opts = {:include_unpublished => include_unpublished}
+
+    resource = JSONModel(:resource).new(obj)
+    JSONModel::set_publish_flags!(resource)
+    marc = ASpaceExport.model(:marc21).from_resource(resource, opts)
+
     ASpaceExport::serialize(marc)
   end
 

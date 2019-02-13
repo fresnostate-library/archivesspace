@@ -1,8 +1,11 @@
 class AgentsController <  ApplicationController
   include ResultInfo
-  include TreeApis
 
-  skip_before_filter  :verify_authenticity_token
+  skip_before_action  :verify_authenticity_token
+
+  before_action(:only => [:show]) {
+    process_slug_or_id(params)
+  }
 
   DEFAULT_AG_TYPES = %w{repository resource accession archival_object digital_object}
   DEFAULT_AG_FACET_TYPES = %w{primary_type subjects}
@@ -29,10 +32,19 @@ class AgentsController <  ApplicationController
     search_opts = default_search_opts(DEFAULT_AG_SEARCH_OPTS)
     search_opts['fq'] = ["used_within_published_repository:\"/repositories/#{repo_id}\""] if repo_id
     @base_search  =  repo_id ? "/repositories/#{repo_id}/agents?" : '/agents?'
-    default_facets = DEFAULT_AG_FACET_TYPES
+    default_facets = DEFAULT_AG_FACET_TYPES.dup
     default_facets.push('used_within_published_repository') unless repo_id
     page = Integer(params.fetch(:page, "1"))
-    set_up_and_run_search( DEFAULT_AG_TYPES, default_facets,  search_opts, params)
+
+    begin
+      set_up_and_run_search( DEFAULT_AG_TYPES, default_facets, search_opts, params)
+    rescue NoResultsError
+      flash[:error] = I18n.t('search_results.no_results')
+      redirect_back(fallback_location: '/') and return
+    rescue Exception => error
+      flash[:error] = I18n.t('errors.unexpected_error')
+      redirect_back(fallback_location: '/agents') and return
+    end
 
     @context = repo_context(repo_id, 'agent')
     if @results['total_hits'] > 1

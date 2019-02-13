@@ -1,32 +1,32 @@
-class ResourcesController <  ApplicationController
+class ResourcesController < ApplicationController
   include ResultInfo
   helper_method :process_repo_info
   helper_method :process_subjects
   helper_method :process_agents
 
-  include TreeApis
+  skip_before_action  :verify_authenticity_token
 
-  skip_before_filter  :verify_authenticity_token
-
+  before_action(:only => [:show]) {
+    process_slug_or_id(params)
+  }
 
   DEFAULT_RES_FACET_TYPES = %w{primary_type subjects published_agents}
-  
   DEFAULT_RES_INDEX_OPTS = {
-    'resolve[]' => ['repository:id',  'resource:id@compact_resource', 'top_container_uri_u_sstr:id'],
+    'resolve[]' => ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id'],
     'sort' => 'title_sort asc',
     'facet.mincount' => 1
   }
 
   DEFAULT_RES_SEARCH_OPTS = {
-    'resolve[]' => ['repository:id',  'resource:id@compact_resource', 'ancestors:id@compact_resource', 'top_container_uri_u_sstr:id'],
+    'resolve[]' => ['repository:id', 'resource:id@compact_resource', 'ancestors:id@compact_resource', 'top_container_uri_u_sstr:id'],
     'facet.mincount' => 1
   }
 
   DEFAULT_RES_SEARCH_PARAMS = {
-    :q => ['*'],
-    :limit => 'resource',
-    :op => [''],
-    :field => ['title']
+    q: ['*'],
+    limit: 'resource',
+    op: [''],
+    field: ['title']
   }
   DEFAULT_RES_TYPES = %w{pui_archival_object pui_digital_object agent subject}
 
@@ -34,7 +34,7 @@ class ResourcesController <  ApplicationController
   def index
     @repo_id = params.fetch(:rid, nil)
     if @repo_id
-      @base_search =  "/repositories/#{@repo_id}/resources?"
+      @base_search = "/repositories/#{@repo_id}/resources?"
       repo = archivesspace.get_record("/repositories/#{@repo_id}")
       @repo_name = repo.display_string
     else
@@ -46,9 +46,18 @@ class ResourcesController <  ApplicationController
       params[k] = v unless params.fetch(k, nil)
     end
     page = Integer(params.fetch(:page, "1"))
-    facet_types = DEFAULT_RES_FACET_TYPES
+    facet_types = DEFAULT_RES_FACET_TYPES.dup
     facet_types.unshift('repository') if !@repo_id
-    set_up_and_run_search(['resource'], facet_types,search_opts, params)
+    begin
+      set_up_and_run_search(['resource'], facet_types, search_opts, params)
+    rescue NoResultsError
+      flash[:error] = I18n.t('search_results.no_results')
+      redirect_back(fallback_location: '/') and return
+    rescue Exception => error
+      flash[:error] = I18n.t('errors.unexpected_error')
+      redirect_back(fallback_location: '/' ) and return
+    end
+
     @context = repo_context(@repo_id, 'resource')
      if @results['total_hits'] > 1
         @search[:dates_within] = true if params.fetch(:filter_from_year,'').blank? && params.fetch(:filter_to_year,'').blank?
@@ -78,7 +87,7 @@ class ResourcesController <  ApplicationController
 #    end
   end
 
-  def search 
+  def search
     repo_id = params.require(:repo_id)
     res_id = "/repositories/#{repo_id}/resources/#{params.require(:id)}"
     search_opts = DEFAULT_RES_SEARCH_OPTS
@@ -105,9 +114,9 @@ class ResourcesController <  ApplicationController
       process_search_results(@base_search)
       title = ''
       title =  strip_mixed_content(@results['results'][0]['_resolved_resource']['json']['title']) if @results['results'][0] &&  @results['results'][0].dig('_resolved_resource', 'json')
-       
+
       @context = []
-      @context.push({:uri => "/repositories/#{repo_id}", 
+      @context.push({:uri => "/repositories/#{repo_id}",
                       :crumb => get_pretty_facet_value('repository', "/repositories/#{repo_id}")})
       unless title.blank?
         @context.push({:uri => "#{res_id}", :crumb => title})
@@ -197,62 +206,62 @@ class ResourcesController <  ApplicationController
   end
 
   def tree_root
-    @root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
-
-    render :json => archivesspace.get_raw_record(@root_uri + '/tree/root')
+		@root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		render json: archivesspace.get_raw_record(@root_uri + '/tree/root')
+	rescue RecordNotFound
+		render json: {}, status: 404
   end
 
   def tree_node
-    @root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
-
-    render :json => archivesspace.get_raw_record(@root_uri + '/tree/node_' + params[:node])
+		@root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		render json: archivesspace.get_raw_record(@root_uri + '/tree/node_' + params[:node])
+	rescue RecordNotFound
+		render json: {}, status: 404
   end
 
-  def tree_waypoint
-    @root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
-
-    render :json => archivesspace.get_raw_record(@root_uri + '/tree/waypoint_' + params[:node] + '_' + params[:offset])
-  end
+	def tree_waypoint
+		@root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		render json: archivesspace.get_raw_record(@root_uri + '/tree/waypoint_' + params[:node] + '_' + params[:offset])
+	rescue RecordNotFound
+		render json: {}, status: 404
+	end
 
   def tree_node_from_root
-    @root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
-
-    render :json => archivesspace.get_raw_record(@root_uri + '/tree/node_from_root_' + params[:node_ids].first)
+		@root_uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		render :json => archivesspace.get_raw_record(@root_uri + '/tree/node_from_root_' + params[:node_ids].first)
+	rescue RecordNotFound
+		render json: {}, status: 404
   end
 
   def inventory
-    uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
+		tree_root = archivesspace.get_raw_record(uri + '/tree/root') rescue nil
+		@has_children = tree_root && tree_root['child_count'] > 0
+		# stuff for the collection bits
+		@criteria = {}
+		@criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id', 'related_accession_uris:id']
+		@result =  archivesspace.get_record(uri, @criteria)
+		@repo_info = @result.repository_information
+		@page_title = "#{I18n.t('resource._singular')}: #{strip_mixed_content(@result.display_string)}"
+		@context = [{:uri => @repo_info['top']['uri'], :crumb => @repo_info['top']['name']}, {:uri => nil, :crumb => process_mixed_content(@result.display_string)}]
+		fill_request_info
 
-    tree_root = archivesspace.get_raw_record(uri + '/tree/root') rescue nil
-    @has_children = tree_root && tree_root['child_count'] > 0
+		# top container stuff ... sets @records
+		fetch_containers(uri, "#{uri}/inventory", params)
 
-    begin
-      # stuff for the collection bits
-      @criteria = {}
-      @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id', 'related_accession_uris:id']
-      @result =  archivesspace.get_record(uri, @criteria)
-      @repo_info = @result.repository_information
-      @page_title = "#{I18n.t('resource._singular')}: #{strip_mixed_content(@result.display_string)}"
-      @context = [{:uri => @repo_info['top']['uri'], :crumb => @repo_info['top']['name']}, {:uri => nil, :crumb => process_mixed_content(@result.display_string)}]
-      fill_request_info
+		if !@results.blank?
+			params[:q] = '*'
+			@pager =  Pager.new(@base_search, @results['this_page'], @results['last_page'])
+		else
+			@pager = nil
+		end
 
-      # top container stuff ... sets @records
-      fetch_containers(uri, "#{uri}/inventory", params)
-
-      if !@results.blank?
-        params[:q] = '*'
-        @pager =  Pager.new(@base_search, @results['this_page'], @results['last_page'])
-      else
-        @pager = nil
-      end
-
-    rescue RecordNotFound
-      @type = I18n.t('resource._singular')
-      @page_title = I18n.t('errors.error_404', :type => @type)
-      @uri = uri
-      @back_url = request.referer || ''
-      render  'shared/not_found', :status => 404
-    end
+	rescue RecordNotFound
+		@type = I18n.t('resource._singular')
+		@page_title = I18n.t('errors.error_404', :type => @type)
+		@uri = uri
+		@back_url = request.referer || ''
+		render  'shared/not_found', :status => 404
   end
 
 

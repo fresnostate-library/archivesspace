@@ -9,9 +9,9 @@ require 'test_utils'
 require_relative '../../indexer/app/lib/periodic_indexer.rb'
 require 'ladle'
 require 'simplecov'
+require 'active_support/inflector'
 
 
-Dir.chdir(File.dirname(__FILE__))
 $solr_port = 2999
 $ldap_port = 3897
 $port = 3434
@@ -70,7 +70,7 @@ end
 def start_ldap
   Ladle::Server.new(:tmpdir => Dir.tmpdir,
                     :port => $ldap_port,
-                    :ldif => File.absolute_path("data/aspace.ldif"),
+                    :ldif => File.absolute_path("tests/data/aspace.ldif"),
                     :java_bin => ["java", "-Xmx64m"],
                     :domain => "dc=archivesspace,dc=org").tap do |s|
     s.start
@@ -164,7 +164,7 @@ def run_tests(opts)
 
   puts "Create a subject with no terms"
   r = do_post({
-                :source => "local", 
+                :source => "local",
                 :terms => [],
                 :vocabulary => "/vocabularies/1"
               }.to_json,
@@ -175,7 +175,7 @@ def run_tests(opts)
 
   puts "Create a subject"
   r = do_post({
-                :source => "local", 
+                :source => "local",
                   :terms => [
                            :term => "Some term #{$me}",
                            :term_type => "function",
@@ -193,7 +193,7 @@ def run_tests(opts)
   r = do_post({
                 :title => "integration test resource #{$$}",
                 :id_0 => "abc123",
-                :dates => [ { "date_type" => "single", "label" => "creation", "expression" => "1492"   } ], 
+                :dates => [ { "date_type" => "single", "label" => "creation", "expression" => "1492"   } ],
                 :subjects => [{"ref" => "/subjects/#{subject_id}"}],
                 :language => "eng",
                 :level => "collection",

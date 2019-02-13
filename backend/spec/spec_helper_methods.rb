@@ -4,7 +4,7 @@ module SpecHelperMethods
   extend self
 
   def make_test_repo(code = "ARCHIVESSPACE", org_code = "test")
-    repo = create(:repo, {:repo_code => code, :org_code => org_code})
+    repo = create(:repo, {:repo_code => code, :org_code => org_code, :is_slug_auto => 0})
 
     @repo_id = repo.id
     @repo = JSONModel(:repository).uri_for(repo.id)
@@ -34,6 +34,14 @@ module SpecHelperMethods
   end
 
 
+  def create_archival_object(opts = {})
+    ArchivalObject.create_from_json(
+      build(:json_archival_object, opts),
+      :repo_id => $repo_id
+    )
+  end
+
+
   def create_event(opts = {})
     Event.create_from_json(build(:json_event, opts),
                            :repo_id => $repo_id)
@@ -47,6 +55,13 @@ module SpecHelperMethods
 
   def create_digital_object(opts = {})
     DigitalObject.create_from_json(build(:json_digital_object, opts), :repo_id => $repo_id)
+  end
+
+
+  def create_digital_object_component(opts = {})
+    DigitalObjectComponent.create_from_json(
+      build(:json_digital_object_component, opts), :repo_id => $repo_id
+    )
   end
 
 

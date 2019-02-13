@@ -21,13 +21,16 @@
 
   <% define_template("digital_object_component", jsonmodel_definition(:digital_object_component)) do |form| %>
     <section id="basic_information">
-      <h3>
+      <h2>
         <%= I18n.t("digital_object_component._frontend.section.basic_information") %>
         <%= link_to_help :topic => "digital_object_component_basic_information" %>
-      </h3>
+      </h2>
       <%= form.label_and_textfield "label", :required => :conditionally %>
       <%= form.label_and_textarea "title", :required => :conditionally %>
       <%= form.label_and_textfield "component_id" %>
+
+      <%= render_aspace_partial :partial => "shared/slug", :locals => {:form => form, :record_type => @digital_object_component} if AppConfig[:use_human_readable_URLs] %>
+
       <div class="form-group">
         <%= form.label "publish", :class => 'control-label col-sm-2' %>
         <div class="checkbox col-sm-9">

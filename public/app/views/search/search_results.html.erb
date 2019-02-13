@@ -3,7 +3,7 @@
   <div class="col-sm-12">
      <%= render partial: 'shared/breadcrumbs' %>
   <% if defined?(@search_title) %>
-  <h1><%= @search_title %></h1>
+  <h2><%= @search_title %></h2>
   <% end %>
 
   <% if defined?(@reset) && @reset %>
@@ -15,9 +15,10 @@
                                                     :field_options => [["#{t('search_results.filter.fullrecord')}",''],
                                                                        ["#{t('search_results.filter.title')}",'title'],
                                                                        ["#{t('search_results.filter.creators')}",'creators_text'],
+                                                                       ["#{t('search_results.filter.subjects')}",'subjects_text'],
                                                                        ["#{t('search_results.filter.notes')}", 'notes'],
-                                                                       ["#{t('search_results.filter.identifier')}", 'identifier'] ],
-                                                    :header_size => '1',
+                                                                       ["#{t('search_results.filter.identifier')}", 'four_part_id'] ],
+                                                    :header_size => '2',
                                                     :show_header => true } %>
   <% else %>
 
@@ -41,8 +42,9 @@
                                                       :field_options => [["#{t('search_results.filter.fullrecord')}",''],
                                                                          ["#{t('search_results.filter.title')}",'title'],
                                                                          ["#{t('search_results.filter.creators')}",'creators_text'],
+                                                                         ["#{t('search_results.filter.subjects')}",'subjects_text'],
                                                                          ["#{t('search_results.filter.notes')}", 'notes'],
-                                                                         ["#{t('search_results.filter.identifier')}", 'identifier'] ],
+                                                                         ["#{t('search_results.filter.identifier')}", 'four_part_id'] ],
                                                       :show_header => false } %>
       </div>
     </div>
@@ -75,7 +77,7 @@
     <% end %>
     </div></div>
     <div class="row"><div class="col-sm-9">
-    <%= render partial: 'shared/pagination', locals: {:pager  => @pager}  %>
+    <%= render partial: 'shared/pagination', locals: {:pager  => @pager, :pager_id => 'paging_bottom'}  %>
     </div></div>
   </div>
   <div class="col-sm-3">

@@ -50,12 +50,14 @@ class Driver
     profile['pdfjs.disabled'] = true
 
     if java.lang.System.getProperty('os.name').downcase == 'linux'
-      ENV['PATH'] = "#{File.join(ASUtils.find_base_directory, 'selenium', 'bin', 'geckodriver', 'linux')}:#{ENV['PATH']}"
+      ENV['PATH'] = "#{File.join(ASUtils.find_base_directory, 'common', 'selenium', 'bin', 'geckodriver', 'linux')}:#{ENV['PATH']}"
     else #osx
-      ENV['PATH'] = "#{File.join(ASUtils.find_base_directory, 'selenium', 'bin', 'geckodriver', 'osx')}:#{ENV['PATH']}"
+      ENV['PATH'] = "#{File.join(ASUtils.find_base_directory, 'common', 'selenium', 'bin', 'geckodriver', 'osx')}:#{ENV['PATH']}"
     end
      
-     return Selenium::WebDriver.for :firefox,:profile => profile
+    options = Selenium::WebDriver::Firefox::Options.new
+    options.profile = profile
+    return Selenium::WebDriver.for :firefox, options: options
   end
 
 

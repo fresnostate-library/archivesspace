@@ -93,10 +93,12 @@ class Resource < Record
       subj['authority_id'] ? subj['authority_id'] : subj['title']
     }
 
-    md['inLanguage'] = {
-      '@type' => 'Language',
-      'name' => I18n.t("enumerations.language_iso639_2.#{raw['language']}", :default => raw['language'])
-    }
+    if raw['language'].try(:any?)
+         md['inLanguage'] = {
+           '@type' => 'Language',
+           'name' => I18n.t("enumerations.language_iso639_2.#{raw['language']}", :default => raw['language'])
+         }
+    end
 
     md['provider'] = {
       '@id' => json['repository']['_resolved']['agent_representation']['_resolved']['display_name']['authority_id'],
@@ -181,7 +183,7 @@ class Resource < Record
 
   def parse_related_accessions
     ASUtils.wrap(raw['related_accession_uris']).collect{|uri|
-      if raw['_resolved_related_accession_uris']
+      if raw['_resolved_related_accession_uris'] && !raw['_resolved_related_accession_uris'][uri].nil?
         raw['_resolved_related_accession_uris'][uri].first
       end
     }.compact.select{|accession|

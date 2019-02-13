@@ -1,3 +1,5 @@
+# Schema inherits from the abstract_archival_object schema, and must only include extensions/overrides unique to resource records.
+
 {
   :schema => {
     "$schema" => "http://www.archivesspace.org/archivesspace.json",
@@ -16,6 +18,9 @@
       "other_level" => {"type" => "string", "maxLength" => 255},
 
       "language" => {"ifmissing" => "warn"},
+
+      "slug" => {"type" => "string"},
+      "is_slug_auto" => {"type" => "boolean"},
 
       "resource_type" => {"type" => "string", "dynamic_enum" => "resource_resource_type"},
       "tree" => {

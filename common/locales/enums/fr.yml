@@ -4,6 +4,8 @@
       source: Source
       outcome: Résultat
       transfer: Transfert
+      context: Context
+      requested: Requested
     linked_agent_archival_record_relators:
       abr: Agrégateur
       act: Acteur
@@ -281,6 +283,7 @@
       executing_program: Executing Program
       implementer: Implementer
       recipient: Recipient
+      requester: Requester
       transmitter: Transmitter
       validator: Validator
     name_source:
@@ -288,10 +291,11 @@
       ingest: Unspecified ingested source
       lcshac: Library of Congress Children's Subject Headings
       local: Local sources
+      lcnaf: Library of Congress Name Authority File
       naf: NACO Authority File
       nad: NAD / ARK II Name Authority Database
       nal: National Agricultural Library subject headings
-      ram: Répertoire d'autorités RAMEAU  
+      ram: Répertoire d'autorités RAMEAU
       rvm: Répertoire de vedettes-matière
       ulan: Union List of Artist Names
     name_rule:
@@ -378,6 +382,7 @@
       processing_completed: Traitement achevé
       publication: Publication
       replication: Reproduction
+      request: Request
       rights_transferred: Droits transférés
       validation: Validation
       virus_check: Virus Check
@@ -433,12 +438,16 @@
       nal: National Agricultural Library subject headings
       rbgenr: "Genre Terms: A Thesaurus for Use in Rare Book and Special Collections Cataloguing"
       rvm: Répertoire de vedettes-matière
-      ram: Répertoire d'autorités RAMEAU  
+      ram: Répertoire d'autorités RAMEAU
       tgn: Getty Thesaurus of Geographic Names
+      lcgft: Library of Congress Genre/Form Terms
     event_outcome:
       pass: Réussite
       partial pass: Réussite partielle
       fail: Echec
+      cancelled: Supprimé
+      fulfilled: Accompli
+      pending: En attente
     agent_contact_salutation:
       mr: M.
       mrs: Mme
@@ -575,6 +584,7 @@
       chv: Tchouvache
       chy: Cheyenne
       cmc: Langues chames
+      cnr: Monténégrin
       cop: Copte
       cor: Cornique
       cos: Corse
@@ -837,7 +847,6 @@
       pra: Langues prâkrit
       pro: "Provençal ancien, occitan ancien (jusqu'à 1500)"
       pus: Pachto; Pashtou
-      qaa-qtz: "Reservé pour utilisation locale"
       que: Quéchua
       raj: Rajasthani
       rap: Rapanui
@@ -965,6 +974,7 @@
       zap: Zapotèque
       zbl: Smboles Bliss, Bliss
       zen: Zénaga
+      zgh: Amazighe Standard Marocain
       zha: Zhuang; Chuang
       znd: Langues zandé
       zul: Zoulou
@@ -1211,7 +1221,7 @@
       NU: Niue
       NF: Iles Norfolk
       MP: Northern Mariana Islands
-      NO: Norvège
+      "NO": Norvège
       OM: Oman
       PK: Pakistan
       PW: Palaos
@@ -1307,10 +1317,10 @@
       disallow: Interdire
       conditional: Conditionnel
     rights_statement_rights_type:
-      intellectual_property: Propriété intellectuelle
+      copyright: Propriété intellectuelle
       license: Permission
       statute: Statut
-      institutional_policy: Politique institutionnelle
+      other: Autre
     rights_statement_ip_status:
       copyrighted: Droits d'auteur
       public_domain: Domaine public
@@ -1347,7 +1357,6 @@
       phystech: Caractéristiques matérielles et contraintes techniques
       prefercite: Référence privilégiée
       processinfo: Information sur le traitement
-      relatedmaterial: Documents en relation
       scopecontent: Présentation du contenu
       separatedmaterial: Documents séparés
       userestrict: Conditions d'utilisation
@@ -1415,6 +1424,7 @@
       function: Fonction
       occupation: Activité
       title: Titre
+      genre_form: Genre/forme
       geographic_name: Nom géographique
     user_defined_enum_1:
       novalue: Aucune valeur définie
@@ -1563,10 +1573,10 @@
     agent_relationship_parentchild_relator: Relation agents Rapport de génération
     agent_relationship_subordinatesuperior_relator: Relation agents Rapport de hiérarchie
     archival_record_level: Niveau de notice archivistique
-    collection_management_processing_priority: Gestion de collection Priorité de traitement
-    collection_management_processing_status: Gestion de collection Etat de traitement
-    container_location_status: Localisation contenant Statut
-    container_type: Type de contenant
+    collection_management_processing_priority: Gestion des collections Priorité de traitement
+    collection_management_processing_status: Gestion des collections Etat de traitement
+    container_location_status: Localisation des conditionnements Statut
+    container_type: Type de conditionnement
     country_iso_3166: Pays ISO 3166
     date_calendar: Calendrier
     date_certainty: Fiabilité de la date
@@ -1603,7 +1613,7 @@
     note_orderedlist_enumeration: Note Enumération en liste hiérarchique
     note_rights_statement_act_type: Note Type de convention
     note_rights_statement_type: Note Type de mention de droits
-    note_singlepart_type: Note Type de singlepart
+    note_singlepart_type: Type de note simple
     telephone_number_type: Type de numéro de téléphone
     resource_finding_aid_description_rules: Instrument de recherche de la ressource Règles de description
     resource_finding_aid_status: Instrument de recherche de la ressource Statut
@@ -1617,7 +1627,7 @@
     user_defined_enum_3: Défini par l'utilisateur Enum 3
     user_defined_enum_4: Défini par l'utilisateur Enum 4
     job_type: Type de tâche
-    dimension_units: Unités de dimensions
+    dimension_units: Unités de mesure
     restriction_type: Consultation locale Type de restriction
     location_function_type: Localisation Type de fonction
     rights_statement_external_document_identifier_type: Déclaration de droits Type d'identifiant externe

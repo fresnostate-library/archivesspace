@@ -30,11 +30,12 @@ class ArchivesSpaceService < Sinatra::Base
   Endpoint.get('/repositories/:repo_id/digital_objects/mets/:id.xml')
     .description("Get a METS representation of a Digital Object ")
     .params(["id", :id],
-            ["repo_id", :repo_id])
+            ["repo_id", :repo_id],
+            ["dmd", String, "DMD Scheme to use", :optional => true])
     .permissions([:view_repository])
     .returns([200, "(:digital_object)"]) \
   do
-    mets = generate_mets(params[:id])
+    mets = generate_mets(params[:id], params[:dmd])
 
     xml_response(mets)
   end
@@ -82,11 +83,13 @@ class ArchivesSpaceService < Sinatra::Base
   Endpoint.get('/repositories/:repo_id/resources/marc21/:id.xml')
     .description("Get a MARC 21 representation of a Resource")
     .params(["id", :id],
-            ["repo_id", :repo_id])
+            ["repo_id", :repo_id],
+            ["include_unpublished_marc", BooleanParam, "Include unpublished notes", :optional => true])
     .permissions([:view_repository])
     .returns([200, "(:resource)"]) \
   do
-    marc = generate_marc(params[:id])
+
+    marc = generate_marc(params[:id], params[:include_unpublished_marc])
 
     xml_response(marc)
   end
@@ -95,7 +98,8 @@ class ArchivesSpaceService < Sinatra::Base
   Endpoint.get('/repositories/:repo_id/resources/marc21/:id.:fmt/metadata')
     .description("Get metadata for a MARC21 export")
     .params(["id", :id],
-            ["repo_id", :repo_id])
+            ["repo_id", :repo_id],
+            ["include_unpublished_marc", BooleanParam, "Include unpublished notes", :optional => true])
     .permissions([:view_repository])
     .returns([200, "The export metadata"]) \
   do

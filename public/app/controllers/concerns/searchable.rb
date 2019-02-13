@@ -1,3 +1,5 @@
+require 'advanced_query_builder'
+
 module Searchable
   extend ActiveSupport::Concern
 # also sets up searches, handles search results.
@@ -96,10 +98,10 @@ module Searchable
       @base_search += "q[]=#{CGI.escape(query)}&op[]=#{CGI.escape(op)}&field[]=#{CGI.escape(field)}&from_year[]=#{CGI.escape(from)}&to_year[]=#{CGI.escape(to)}"
       builder = AdvancedQueryBuilder.new
       # add field part of the row
-      builder.and(field, query, 'text', op == 'NOT')
+      builder.and(field, query, 'text', false, op == 'NOT')
       # add year range part of the row
       unless from.blank? && to.blank?
-        builder.and('years', AdvancedQueryBuilder::RangeValue.new(from, to), 'range', op == 'NOT')
+        builder.and('years', AdvancedQueryBuilder::RangeValue.new(from, to), 'range', false, op == 'NOT')
       end
       # add to the builder based on the op
       if op == 'OR'
@@ -113,7 +115,7 @@ module Searchable
    # any  search within results?
     @search[:filter_q].each do |v|
       value = v == '' ? '*' : v
-      advanced_query_builder.and('keyword', value, 'text', false)
+      advanced_query_builder.and('keyword', value, 'text', false, false)
     end
      # we have to add filtered dates, if they exist
     unless @search[:dates_searched] || (@search[:filter_to_year].blank? && @search[:filter_from_year].blank?)
@@ -122,7 +124,7 @@ module Searchable
       to = @search[:filter_to_year]
       builder = AdvancedQueryBuilder.new
 #      builder.and('keyword','*', 'text', false)
-      builder.and('years', AdvancedQueryBuilder::RangeValue.new(from, to), 'range', false)
+      builder.and('years', AdvancedQueryBuilder::RangeValue.new(from, to), 'range', false, false)
       advanced_query_builder.and(builder)
 #      @base_search += "&filter_from_year=#{@search[:filter_from_year]}&filter_to_year=#{@search[:filter_to_year]}"
     end
@@ -135,7 +137,7 @@ module Searchable
     unless @criteria['fq'].blank?
       @criteria['fq'].each do |fq |
         f,v = fq.split(":")
-        advanced_query_builder.and(f, v, "text", false)
+        advanced_query_builder.and(f, v, "text", false, false)
       end
     end
 
@@ -229,7 +231,7 @@ module Searchable
   def process_results(results, full)
     results.each do |result|
       if !result['json'].blank?
-        result['json'] = JSON.parse(result['json']) || {}
+        result['json'] = ASUtils.json_parse(result['json']) || {}
 #        Pry::ColorPrinter.pp(result['json'])
       end
       result['json']['display_string'] = full_title(result['json'])
@@ -241,7 +243,7 @@ module Searchable
       if result['_resolved_repository'].kind_of?(Hash)
         rr = result['_resolved_repository'].shift
         if !rr[1][0]['json'].blank?
-          result['_resolved_repository']['json'] = JSON.parse( rr[1][0]['json'])
+          result['_resolved_repository']['json'] = ASUtils.json_parse( rr[1][0]['json'])
         end
       end
       # A different kind of convolution
@@ -257,7 +259,7 @@ module Searchable
 #Pry::ColorPrinter.pp result['_resolved_top_container_uri_u_sstr']
         rr = result['_resolved_top_container_uri_u_sstr'].shift
         if !rr[1][0]['json'].blank?
-          result['_resolved_top_container_uri_u_sstr']['json'] = JSON.parse( rr[1][0]['json'])
+          result['_resolved_top_container_uri_u_sstr']['json'] = ASUtils.json_parse( rr[1][0]['json'])
         end
       end
     end

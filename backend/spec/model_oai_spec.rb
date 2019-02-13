@@ -1,85 +1,15 @@
 require 'spec_helper'
 require 'stringio'
+require 'oai_helper'
 
+require_relative 'export_spec_helper'
 require_relative 'oai_response_checker'
 
 describe 'OAI handler' do
-
-  FIXTURES_DIR = File.join(File.dirname(__FILE__), "fixtures", "oai")
-
-  def fake_job_monitor
-    job_monitor = Object.new
-
-    def job_monitor.method_missing(*)
-      # Do nothing
-    end
-
-    job_monitor
-  end
+  FIXTURES_DIR = OAIHelper::FIXTURES_DIR
 
   before(:all) do
-    @oai_repo_id = RequestContext.open do
-      create(:repo, {:repo_code => "oai_test", :org_code => "oai", :name => "oai_test"}).id
-    end
-
-    test_subjects = ASUtils.json_parse(File.read(File.join(FIXTURES_DIR, 'subjects.json')))
-    test_agents = ASUtils.json_parse(File.read(File.join(FIXTURES_DIR, 'agents.json')))
-
-    test_resource_template = ASUtils.json_parse(File.read(File.join(FIXTURES_DIR, 'resource.json')))
-    test_archival_object_template = ASUtils.json_parse(File.read(File.join(FIXTURES_DIR, 'archival_object.json')))
-
-    # Create some test Resource records -- fully filled out with agents,
-    # subjects and notes.
-    @test_record_count = 5
-
-    test_resources = @test_record_count.times.map do |i|
-      resource = test_resource_template.clone
-      resource['uri'] = "/repositories/2/resources/import_#{i}"
-      resource['title'] = "Test resource #{i}"
-      resource['id_0'] = "Resource OAI test #{i}"
-
-      resource['ead_id'] = "ead_id_#{i}"
-      resource['finding_aid_sponsor'] = "sponsor_#{i}"
-
-      resource
-    end
-
-    # Create some Archival Object records -- same deal.
-    test_archival_objects = @test_record_count.times.map do |i|
-      archival_object = test_archival_object_template.clone
-      archival_object['uri'] = "/repositories/2/archival_objects/import_#{SecureRandom.hex}"
-      archival_object['component_id'] = "ArchivalObject OAI test #{i}"
-      archival_object['resource'] = {'ref' => test_resources.fetch(i).fetch('uri')}
-
-      # Mark one of them with a different level for our set tests
-      archival_object['level'] = ((i == 4) ? 'fonds' : 'file')
-
-      archival_object
-    end
-
-    # Import the whole lot
-    test_data = StringIO.new(ASUtils.to_json(test_subjects +
-                                             test_agents +
-                                             test_resources +
-                                             test_archival_objects))
-
-    RequestContext.open(:repo_id => @oai_repo_id) do
-      created_records = as_test_user('admin') do
-        StreamingImport.new(test_data, fake_job_monitor, false, false).process
-      end
-
-      @test_resource_record = created_records.fetch(test_resources[0]['uri'])
-      @test_archival_object_record = created_records.fetch(test_archival_objects[0]['uri'])
-
-      as_test_user('admin') do
-        # Prepare some deletes
-        5.times do
-          ao = create(:json_archival_object)
-
-          ArchivalObject[ao.id].delete
-        end
-      end
-    end
+    @oai_repo_id, @test_record_count, @test_resource_record, @test_archival_object_record = OAIHelper.load_oai_data
   end
 
   around(:each) do |example|
@@ -133,21 +63,37 @@ describe 'OAI handler' do
     it "responds to an OAI Identify request" do
       expect {
         check_oai_request_against_fixture('identify', :verb => 'Identify')
-      }.to_not raise_error
+      }.not_to raise_error
     end
 
     it "responds to an OAI ListMetadataFormats request" do
       expect {
         check_oai_request_against_fixture('list_metadata_formats', :verb => 'ListMetadataFormats')
-      }.to_not raise_error
+      }.not_to raise_error
     end
 
     it "responds to an OAI ListSets request" do
       expect {
         check_oai_request_against_fixture('list_sets', :verb => 'ListSets')
-      }.to_not raise_error
+      }.not_to raise_error
     end
 
+    it "includes sets defined in OAIConfig table in ListSets request" do
+      oc = OAIConfig.first
+      oc.update(:repo_set_codes       => ['foo', 'bar'].to_json, 
+                :repo_set_description => "foobar",
+                :repo_set_name        => "repo_set_name",
+                :sponsor_set_names    => ['bim', 'baz'].to_json, 
+                :sponsor_set_description => "bimbaz",
+                :sponsor_set_name        => "sponsor_set_name",
+                ) 
+      
+      result = ArchivesSpaceOaiProvider.new.process_request(:verb => 'ListSets')
+      expect(result).to match(/<setSpec>sponsor_set_name<\/setSpec><setName>sponsor_set_name<\/setName>/)
+      expect(result).to match(/<setSpec>repo_set_name<\/setSpec><setName>repo_set_name<\/setName>/)
+      expect(result).to match(/<oai_dc:description>bimbaz<\/oai_dc:description>/)
+      expect(result).to match(/<oai_dc:description>foobar<\/oai_dc:description>/)
+    end
 
     RESOURCE_BASED_FORMATS.each do |prefix|
       it "responds to a GetRecord request for type #{prefix}, mapping appropriately" do
@@ -156,7 +102,7 @@ describe 'OAI handler' do
                                             :verb => 'GetRecord',
                                             :identifier => 'oai:archivesspace/' + @test_resource_record,
                                             :metadataPrefix => prefix)
-        }.to_not raise_error
+        }.not_to raise_error
       end
     end
 
@@ -173,7 +119,7 @@ describe 'OAI handler' do
     #                                         :verb => 'GetRecord',
     #                                         :identifier => 'oai:archivesspace/' + @test_resource_record,
     #                                         :metadataPrefix => prefix)
-    #     }.to_not raise_error
+    #     }.not_to raise_error
     #   end
     # end
   end
@@ -227,20 +173,20 @@ describe 'OAI handler' do
 
     it "supports an unqualified ListRecords request" do
       response = oai_repo.find(:all, {:metadata_prefix => "oai_dc"})
-      response.records.length.should eq(page_size)
+      expect(response.records.length).to eq(page_size)
     end
 
     it "supports resumption tokens" do
       page1_response = oai_repo.find(:all, {:metadata_prefix => "oai_dc"})
       page1_uris = page1_response.records.map(&:jsonmodel_record).map(&:uri)
 
-      page1_response.token.should_not be_nil
+      expect(page1_response.token).not_to be_nil
 
       page2_response = oai_repo.find(:all, {:resumption_token => page1_response.token.serialize})
       page2_uris = page2_response.records.map(&:jsonmodel_record).map(&:uri)
 
       # We got some different URIs on the next page
-      (page2_uris + page1_uris).length.should eq(page1_uris.length + page2_uris.length)
+      expect((page2_uris + page1_uris).length).to eq(page1_uris.length + page2_uris.length)
     end
 
     it "supports date ranges when listing records" do
@@ -262,7 +208,7 @@ describe 'OAI handler' do
                                       :from => start_time,
                                       :until => end_time})
 
-      response.records.length.should eq(record_count)
+      expect(response.records.length).to eq(record_count)
     end
 
     it "lists deletes" do
@@ -278,7 +224,7 @@ describe 'OAI handler' do
 
         if response.is_a?(Array)
           # Our final page of results--which should be entirely deletes
-          response.all?(&:deleted?).should be(true)
+          expect(response.all?(&:deleted?)).to be_truthy
 
           break
         elsif response.token
@@ -294,39 +240,30 @@ describe 'OAI handler' do
 
     it "supports OAI sets based on levels" do
       response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'fonds'})
-      response.records.length.should be > 0
+      expect(response.records.length).to be > 0
 
-      response.records.map(&:jsonmodel_record).map(&:level).uniq.should eq(['fonds'])
+      expect(response.records.map(&:jsonmodel_record).map(&:level).uniq).to eq(['fonds'])
     end
 
 
     it "supports OAI sets based on sponsors" do
-      allow(AppConfig).to receive(:has_key?).with(any_args).and_call_original
-      allow(AppConfig).to receive(:has_key?).with(:oai_sets).and_return(true)
+      oc = OAIConfig.first
+      oc.update(:sponsor_set_names       => ['sponsor_0'].to_json,
+                :sponsor_set_description => "sponsor_set_description")
 
-      allow(AppConfig).to receive(:[]).with(any_args).and_call_original
-      allow(AppConfig).to receive(:[]).with(:oai_sets)
-                            .and_return('sponsor_0' => {
-                                          :sponsors => ['sponsor_0']
-                                        })
+      response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'sponsor_set'})
 
-      response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'sponsor_0'})
-
-      response.records.all? {|record| record.jsonmodel_record.resource['ref'] == @test_resource_record}
-        .should be(true)
+      expect(response.records.all? {|record| record.jsonmodel_record.resource['ref'] == @test_resource_record})
+        .to be_truthy
     end
 
     it "supports OAI sets based on repositories" do
-      allow(AppConfig).to receive(:has_key?).with(any_args).and_call_original
-      allow(AppConfig).to receive(:has_key?).with(:oai_sets).and_return(true)
+      oc = OAIConfig.first
+      oc.update(:repo_set_codes       => ['oai_test'].to_json, 
+                :repo_set_name        => "repo_set_name",
+                :repo_set_description => "repo_set_description")
 
-      allow(AppConfig).to receive(:[]).with(any_args).and_call_original
-      allow(AppConfig).to receive(:[]).with(:oai_sets)
-                            .and_return('by_repo' => {
-                                          :repo_codes => ['oai_test']
-                                        })
-
-      response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'by_repo'})
+      response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'repo_set_name'})
       response.records.all? {|record| record.sequel_record.repo_id == @oai_repo_id}
         .should be(true)
     end
@@ -344,38 +281,29 @@ describe 'OAI handler' do
       }
 
       it "supports OAI sets based on sponsors for resource records too" do
-        allow(AppConfig).to receive(:has_key?).with(any_args).and_call_original
-        allow(AppConfig).to receive(:has_key?).with(:oai_sets).and_return(true)
+        oc = OAIConfig.first
+        oc.update(:sponsor_set_names       => ['sponsor_0'].to_json, 
+                  :sponsor_set_name        => "sponsor_set_name",
+                  :sponsor_set_description => "sponsor_set_description")
 
-        allow(AppConfig).to receive(:[]).with(any_args).and_call_original
-        allow(AppConfig).to receive(:[]).with(:oai_sets)
-                              .and_return('sponsor_0' => {
-                                            :sponsors => ['sponsor_0']
-                                          })
-
-        response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'sponsor_0'})
+        response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'sponsor_set_name'})
 
         # Just matched the single collection
-        response.records.length.should eq(1)
+        expect(response.records.length).to eq(1)
 
         resource = response.records.first
-        resource.jsonmodel_record['finding_aid_sponsor'].should eq('sponsor_0')
+        expect(resource.jsonmodel_record['finding_aid_sponsor']).to eq('sponsor_0')
       end
 
       it "supports OAI sets based on repositories for resource records too" do
-        allow(AppConfig).to receive(:has_key?).with(any_args).and_call_original
-        allow(AppConfig).to receive(:has_key?).with(:oai_sets).and_return(true)
+        oc = OAIConfig.first
+        oc.update(:repo_set_codes          => ['oai_test'].to_json, 
+                  :repo_set_name        => "repo_set_name",
+                  :repo_set_description    => "repo_set_description")
 
-        allow(AppConfig).to receive(:[]).with(any_args).and_call_original
-        allow(AppConfig).to receive(:[]).with(:oai_sets)
-                              .and_return('by_repo' => {
-                                            :repo_codes => ['oai_test']
-                                          })
-
-        response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'by_repo'})
+        response = oai_repo.find(:all, {:metadata_prefix => "oai_dc", :set => 'repo_set_name'})
         response.records.count.should eq(5)
       end
-
     end
 
     it "doesn't reveal published or suppressed records" do
@@ -419,7 +347,169 @@ describe 'OAI handler' do
         break if token.nil?
       end
     end
+  end
+
+  describe 'OAI mappers output' do
+    describe 'DC output' do
+      it "should map Conditions Governing Access and Conditions Governing Use to <dc:rights>" do
+
+        uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_dc"
+
+        response = get uri
+        expect(response.body).to match(/<dc:rights>conditions governing access note<\/dc:rights>/)
+        expect(response.body).to match(/<dc:rights>conditions governing use note<\/dc:rights>/)
+
+        expect(response.body).not_to match(/<dc:relation>conditions governing access note<\/dc:relation>/)
+        expect(response.body).not_to match(/<dc:relation>conditions governing use note<\/dc:relation>/)
+      end
+
+      it "should map Extents to dc:format, not dc:extent" do
+        uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_dc"
+
+        response = get uri
+
+        expect(response.body).to match(/<dc:format>10 Volumes; Container summary<\/dc:format>/)
+        expect(response.body).to match(/<dc:format>physical description note<\/dc:format>/)
+        expect(response.body).to match(/<dc:format>dimensions note<\/dc:format>/)
+
+        expect(response.body).not_to match(/<dc:extent>10 Volumes; Container summary<\/dc:extent>/)
+        expect(response.body).not_to match(/<dc:extent>physical description note<\/dc:extent>/)
+        expect(response.body).not_to match(/<dc:extent>dimensions note<\/dc:extent>/)
+      end
+    end
+  end
+
+  describe 'publish flags' do
+    it "should respect publish flags for dc exports" do
+      uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_dc"
+      response = get uri
+      expect(response.body).not_to match(/note with unpublished parent node/)
+    end
+
+    it "should respect publish flags for ead exports" do
+      uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_ead"
+      response = get uri
+      expect(response.body).not_to match(/note with unpublished parent node/)
+    end
+
+    it "should respect publish flags for marc exports" do
+      uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_marc"
+      response = get uri
+      expect(response.body).not_to match(/note with unpublished parent node/)
+    end
+
+    it "should respect publish flags for mods exports" do
+      uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@test_resource_record}&metadataPrefix=oai_mods"
+      response = get uri
+      expect(response.body).not_to match(/note with unpublished parent node/)
+    end
 
   end
 
+  describe "respository with OAI harvesting disabled" do
+    before(:all) do
+      @repo_disabled = create(:json_repo, :oai_is_disabled => true)
+
+      $another_repo_id = $repo_id
+      $repo_id = @repo_disabled.id
+
+      JSONModel.set_repository($repo_id)
+
+      @resource = create(:json_resource,
+                          :level => 'collection')
+    end
+
+    after(:all) do
+      @resource.delete
+      $repo_id = $another_repo_id
+
+      JSONModel.set_repository($repo_id)
+    end
+
+    it "does not publish resources in a repository with OAI disabled" do
+      uri = "/oai?verb=GetRecord&identifier=oai:archivesspace/#{@resource['uri']}&metadataPrefix=oai_marc"
+
+      response = get uri
+      expect(response.body).to match(/<error code="idDoesNotExist">/)
+    end
+  end
+
+  describe "repository with sets disabled" do
+    before(:all) do
+      # 891 is the enum_value_id for 'fonds'
+      # add a set restriction for only 'fonds' objects
+      Repository.all.each do |r|
+        r.update(:oai_sets_available => (["891"]).to_json)
+      end
+    end
+
+    after(:all) do
+      # change things back: remove all set restrictions
+      Repository.all.each do |r|
+        r.update(:oai_sets_available => "[]")
+      end
+    end
+
+    it "does not return an object if set excluded from OAI in repo" do
+      uri = "/oai?verb=ListRecords&set=collection&metadataPrefix=oai_dc"
+      response = get uri
+      doc = Nokogiri::XML(response.body)
+
+      # should not have any non-tombstone results in xml
+      expect(doc.xpath("//xmlns:header[not(@status='deleted')]").length).to eq(0)
+    end
+
+    it "returns an object if set included in OAI in repo" do
+        # query explicitly for only fonds objects
+        uri = "/oai?verb=ListRecords&set=fonds&metadataPrefix=oai_dc"
+        response = get uri
+        doc = Nokogiri::XML(response.body)
+
+        # should have at least 1 result in XML
+        expect(doc.xpath("//xmlns:header[not(@status='deleted')]").length > 0).to be true
+    end
+
+    it "does not list a set in ListSets if that set is not enabled for at least one repository" do
+        uri = "/oai?verb=ListSets"
+        response = get uri
+        doc = Nokogiri::XML(response.body)
+
+        expect(doc.to_s).to match(/<set><setSpec>fonds<\/setSpec>/)
+
+        expect(doc.to_s).to_not match(/<set><setSpec>class<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>collection<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>file<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>item<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>otherlevel<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>recordgrp<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>series<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>subfonds<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>subgrp<\/setSpec>/)
+        expect(doc.to_s).to_not match(/<set><setSpec>subseries<\/setSpec>/)
+    end
+  end
+
+  describe "repository without sets disabled" do
+    it "does list a set in ListSets if that set is enabled for at least one repository" do
+        Repository.all.each do |r|
+          r.update(:oai_sets_available => "[]")
+        end
+
+        uri = "/oai?verb=ListSets"
+        response = get uri
+        doc = Nokogiri::XML(response.body)
+
+        expect(doc.to_s).to match(/<set><setSpec>fonds<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>class<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>collection<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>file<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>item<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>otherlevel<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>recordgrp<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>series<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>subfonds<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>subgrp<\/setSpec>/)
+        expect(doc.to_s).to match(/<set><setSpec>subseries<\/setSpec>/)
+    end
+  end
 end

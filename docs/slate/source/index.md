@@ -17,13 +17,13 @@ search: true
 
 This is the documentation for the ArchivesSpace RESTful API. This documents the endpoints that are used by the backend server to edit records in the application.
 
-This example API documentation page was created with [Slate](http://github.com/tripit/slate). 
+This example API documentation page was created with [Slate](http://github.com/tripit/slate).
 
 # Authentication
 
 > To authorize, use this code:
 
-<!-- 
+<!--
 ```ruby
 require 'kittn'
 
@@ -154,7 +154,7 @@ curl -s -F password="admin" "http://localhost:8089/users/admin/login"
 }
 ```
 
-> It's a good idea to save the "session" id, since this will be used for later requests. 
+> It's a good idea to save the "session" id, since this will be used for later requests.
 
 
 Most requests to the ArchivesSpace backend requires a user to be authenticated.
@@ -165,10 +165,70 @@ The JSON that is returned will have a session key, which can be stored and used
 for other requests. Sessions will expire after an hour, although you can change this in your config.rb file.
 
 # ArchivesSpace REST API
-As of 2018-02-05 10:01:28 -0500 the following REST endpoints exist in the master branch of the development repository:
+As of 2019-01-14 08:02:07 -0800 the following REST endpoints exist in the master branch of the development repository:
 
 
-## [:POST] /agents/corporate_entities 
+## Create a corporate entity agent
+
+
+
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_corporate_entity",
+"agent_contacts":[{ "jsonmodel_type":"agent_contact",
+"telephones":[{ "jsonmodel_type":"telephone",
+"number_type":"business",
+"number":"5876 0048 068",
+"ext":"254CWR583"}],
+"name":"Name Number 599",
+"address_2":"428GB682817",
+"address_3":"235GKJ13",
+"city":"J251I602552",
+"region":"745WQQE",
+"email":"YDR330V",
+"note":"YT861534Y"}],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"inclusive",
+"label":"existence",
+"begin":"1996-04-07",
+"end":"1996-04-07",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"K205WUC"}],
+"names":[{ "jsonmodel_type":"name_corporate_entity",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"local",
+"primary_name":"Name Number 598",
+"subordinate_name_1":"617OSTQ",
+"subordinate_name_2":"Y101S991J",
+"number":"740516MJ498",
+"sort_name":"SORT j - 516",
+"dates":"SFTX846",
+"qualifier":"UKDQG",
+"authority_id":"http://www.example-563.com",
+"source":"naf"}],
+"related_agents":[],
+"agent_type":"agent_corporate_entity"}' \
+  "http://localhost:8089/agents/corporate_entities"
+
+```
+
+__Endpoint__
+
+```[:POST] /agents/corporate_entities ```
 
 __Description__
 
@@ -181,65 +241,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_corporate_entity",
-"agent_contacts":[{ "jsonmodel_type":"agent_contact",
-"telephones":[{ "jsonmodel_type":"telephone",
-"number_type":"fax",
-"number":"615 05404 17605 10613 6088",
-"ext":"V46F765Q"}],
-"name":"Name Number 624",
-"address_1":"RCCTH",
-"country":"788742T527J",
-"fax":"O389319FR",
-"email":"BLQXQ",
-"email_signature":"UG693886T",
-"note":"LDG206G"}],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"existence",
-"begin":"1974-07-23",
-"end":"1974-07-23",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"174205231SW"}],
-"names":[{ "jsonmodel_type":"name_corporate_entity",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"aacr",
-"primary_name":"Name Number 623",
-"subordinate_name_1":"R193G529X",
-"subordinate_name_2":"LVDU216",
-"number":"FEDPI",
-"sort_name":"SORT d - 540",
-"dates":"761O399494111",
-"qualifier":"NL116Y577",
-"authority_id":"http://www.example-587.com",
-"source":"naf"}],
-"related_agents":[],
-"agent_type":"agent_corporate_entity"}' \
-  "http://localhost:8089//agents/corporate_entities"
+
+
+## List all corporate entity agents
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/corporate_entities?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/corporate_entities?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/corporate_entities?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/corporate_entities 
+```[:GET] /agents/corporate_entities ```
 
 __Description__
 
@@ -254,21 +284,77 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:agent_corporate_entity)]
+  	200 -- [(:agent_corporate_entity)]
 
 
-```shell 
+
+
+## Update a corporate entity agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_corporate_entity",
+"agent_contacts":[{ "jsonmodel_type":"agent_contact",
+"telephones":[{ "jsonmodel_type":"telephone",
+"number_type":"business",
+"number":"5876 0048 068",
+"ext":"254CWR583"}],
+"name":"Name Number 599",
+"address_2":"428GB682817",
+"address_3":"235GKJ13",
+"city":"J251I602552",
+"region":"745WQQE",
+"email":"YDR330V",
+"note":"YT861534Y"}],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"inclusive",
+"label":"existence",
+"begin":"1996-04-07",
+"end":"1996-04-07",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"K205WUC"}],
+"names":[{ "jsonmodel_type":"name_corporate_entity",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"local",
+"primary_name":"Name Number 598",
+"subordinate_name_1":"617OSTQ",
+"subordinate_name_2":"Y101S991J",
+"number":"740516MJ498",
+"sort_name":"SORT j - 516",
+"dates":"SFTX846",
+"qualifier":"UKDQG",
+"authority_id":"http://www.example-563.com",
+"source":"naf"}],
+"related_agents":[],
+"agent_type":"agent_corporate_entity"}' \
+  "http://localhost:8089/agents/corporate_entities/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/corporate_entities/:id 
+```[:POST] /agents/corporate_entities/:id ```
 
 __Description__
 
@@ -283,66 +369,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a corporate entity by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_corporate_entity",
-"agent_contacts":[{ "jsonmodel_type":"agent_contact",
-"telephones":[{ "jsonmodel_type":"telephone",
-"number_type":"fax",
-"number":"615 05404 17605 10613 6088",
-"ext":"V46F765Q"}],
-"name":"Name Number 624",
-"address_1":"RCCTH",
-"country":"788742T527J",
-"fax":"O389319FR",
-"email":"BLQXQ",
-"email_signature":"UG693886T",
-"note":"LDG206G"}],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"existence",
-"begin":"1974-07-23",
-"end":"1974-07-23",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"174205231SW"}],
-"names":[{ "jsonmodel_type":"name_corporate_entity",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"aacr",
-"primary_name":"Name Number 623",
-"subordinate_name_1":"R193G529X",
-"subordinate_name_2":"LVDU216",
-"number":"FEDPI",
-"sort_name":"SORT d - 540",
-"dates":"761O399494111",
-"qualifier":"NL116Y577",
-"authority_id":"http://www.example-587.com",
-"source":"naf"}],
-"related_agents":[],
-"agent_type":"agent_corporate_entity"}' \
-  "http://localhost:8089//agents/corporate_entities/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/corporate_entities/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/corporate_entities/:id 
+```[:GET] /agents/corporate_entities/:id ```
 
 __Description__
 
@@ -353,27 +410,32 @@ __Parameters__
 
 	Integer id -- ID of the corporate entity agent
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:agent_corporate_entity)
-	404 -- Not found
+  	200 -- (:agent_corporate_entity)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"836YS585A"' \
-  "http://localhost:8089//agents/corporate_entities/1"
+
+
+## Delete a corporate entity agent
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/agents/corporate_entities/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /agents/corporate_entities/:id 
+```[:DELETE] /agents/corporate_entities/:id ```
 
 __Description__
 
@@ -386,17 +448,59 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
+
+
+## Create a family agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_family",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"existence",
+"begin":"2005-07-11",
+"end":"2005-07-11",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"MF772233T"}],
+"names":[{ "jsonmodel_type":"name_family",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"aacr",
+"family_name":"Name Number 600",
+"sort_name":"SORT d - 517",
+"dates":"CXHJC",
+"qualifier":"90UQS649",
+"prefix":"41012LNO",
+"authority_id":"http://www.example-564.com",
+"source":"naf"}],
+"related_agents":[],
+"agent_type":"agent_family"}' \
+  "http://localhost:8089/agents/families"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/families 
+```[:POST] /agents/families ```
 
 __Description__
 
@@ -409,52 +513,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_family",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"existence",
-"begin":"2012-06-22",
-"end":"2012-06-22",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"E420A297R"}],
-"names":[{ "jsonmodel_type":"name_family",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"aacr",
-"family_name":"Name Number 625",
-"sort_name":"SORT w - 541",
-"dates":"MO986JG",
-"qualifier":"899AM346T",
-"prefix":"562528665OP",
-"authority_id":"http://www.example-588.com",
-"source":"naf"}],
-"related_agents":[],
-"agent_type":"agent_family"}' \
-  "http://localhost:8089//agents/families"
+
+
+## List all family agents
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/families?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/families?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/families?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/families 
+```[:GET] /agents/families ```
 
 __Description__
 
@@ -469,21 +556,64 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:agent_family)]
+  	200 -- [(:agent_family)]
 
 
-```shell 
+
+
+## Update a family agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_family",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"existence",
+"begin":"2005-07-11",
+"end":"2005-07-11",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"MF772233T"}],
+"names":[{ "jsonmodel_type":"name_family",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"aacr",
+"family_name":"Name Number 600",
+"sort_name":"SORT d - 517",
+"dates":"CXHJC",
+"qualifier":"90UQS649",
+"prefix":"41012LNO",
+"authority_id":"http://www.example-564.com",
+"source":"naf"}],
+"related_agents":[],
+"agent_type":"agent_family"}' \
+  "http://localhost:8089/agents/families/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/families/:id 
+```[:POST] /agents/families/:id ```
 
 __Description__
 
@@ -498,53 +628,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a family by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_family",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"existence",
-"begin":"2012-06-22",
-"end":"2012-06-22",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"E420A297R"}],
-"names":[{ "jsonmodel_type":"name_family",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"aacr",
-"family_name":"Name Number 625",
-"sort_name":"SORT w - 541",
-"dates":"MO986JG",
-"qualifier":"899AM346T",
-"prefix":"562528665OP",
-"authority_id":"http://www.example-588.com",
-"source":"naf"}],
-"related_agents":[],
-"agent_type":"agent_family"}' \
-  "http://localhost:8089//agents/families/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/families/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/families/:id 
+```[:GET] /agents/families/:id ```
 
 __Description__
 
@@ -555,27 +669,32 @@ __Parameters__
 
 	Integer id -- ID of the family agent
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:agent)
-	404 -- Not found
+  	200 -- (:agent)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"GCM365403"' \
-  "http://localhost:8089//agents/families/1"
+
+
+## Delete an agent family
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/agents/families/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /agents/families/:id 
+```[:DELETE] /agents/families/:id ```
 
 __Description__
 
@@ -588,17 +707,65 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
+
+
+## Create a person agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_person",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"existence",
+"begin":"2000-05-02",
+"end":"2000-05-02",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"MWVWF"}],
+"names":[{ "jsonmodel_type":"name_person",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"local",
+"source":"nad",
+"primary_name":"Name Number 601",
+"sort_name":"SORT c - 518",
+"name_order":"direct",
+"number":"332PR682K",
+"dates":"FOQ456V",
+"qualifier":"KD319DV",
+"fuller_form":"WJBHR",
+"prefix":"KFOSQ",
+"title":"986836QX382",
+"suffix":"HQGR648",
+"rest_of_name":"U512154PG",
+"authority_id":"http://www.example-565.com"}],
+"related_agents":[],
+"agent_type":"agent_person"}' \
+  "http://localhost:8089/agents/people"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/people 
+```[:POST] /agents/people ```
 
 __Description__
 
@@ -611,57 +778,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_person",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"existence",
-"begin":"2014-07-10",
-"end":"2014-07-10",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"GJA605557"}],
-"names":[{ "jsonmodel_type":"name_person",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"local",
-"source":"naf",
-"primary_name":"Name Number 626",
-"sort_name":"SORT x - 542",
-"name_order":"direct",
-"number":"P876L404I",
-"dates":"450154YC713",
-"qualifier":"212EPRQ",
-"fuller_form":"XVWYI",
-"prefix":"PC200546K",
-"title":"801GDVL",
-"suffix":"YA943NO",
-"authority_id":"http://www.example-589.com"}],
-"related_agents":[],
-"agent_type":"agent_person"}' \
-  "http://localhost:8089//agents/people"
+
+
+## List all person agents
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/people?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/people?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/people?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/people 
+```[:GET] /agents/people ```
 
 __Description__
 
@@ -676,21 +821,70 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:agent_person)]
+  	200 -- [(:agent_person)]
 
 
-```shell 
+
+
+## Update a person agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_person",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"existence",
+"begin":"2000-05-02",
+"end":"2000-05-02",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"MWVWF"}],
+"names":[{ "jsonmodel_type":"name_person",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"local",
+"source":"nad",
+"primary_name":"Name Number 601",
+"sort_name":"SORT c - 518",
+"name_order":"direct",
+"number":"332PR682K",
+"dates":"FOQ456V",
+"qualifier":"KD319DV",
+"fuller_form":"WJBHR",
+"prefix":"KFOSQ",
+"title":"986836QX382",
+"suffix":"HQGR648",
+"rest_of_name":"U512154PG",
+"authority_id":"http://www.example-565.com"}],
+"related_agents":[],
+"agent_type":"agent_person"}' \
+  "http://localhost:8089/agents/people/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/people/:id 
+```[:POST] /agents/people/:id ```
 
 __Description__
 
@@ -705,58 +899,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a person by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_person",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"existence",
-"begin":"2014-07-10",
-"end":"2014-07-10",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"GJA605557"}],
-"names":[{ "jsonmodel_type":"name_person",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"local",
-"source":"naf",
-"primary_name":"Name Number 626",
-"sort_name":"SORT x - 542",
-"name_order":"direct",
-"number":"P876L404I",
-"dates":"450154YC713",
-"qualifier":"212EPRQ",
-"fuller_form":"XVWYI",
-"prefix":"PC200546K",
-"title":"801GDVL",
-"suffix":"YA943NO",
-"authority_id":"http://www.example-589.com"}],
-"related_agents":[],
-"agent_type":"agent_person"}' \
-  "http://localhost:8089//agents/people/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/people/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/people/:id 
+```[:GET] /agents/people/:id ```
 
 __Description__
 
@@ -767,27 +940,32 @@ __Parameters__
 
 	Integer id -- ID of the person agent
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:agent)
-	404 -- Not found
+  	200 -- (:agent)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"YGS253T"' \
-  "http://localhost:8089//agents/people/1"
+
+
+## Delete an agent person
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/agents/people/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /agents/people/:id 
+```[:DELETE] /agents/people/:id ```
 
 __Description__
 
@@ -800,17 +978,53 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
+
+
+## Create a software agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_software",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"range",
+"label":"existence",
+"begin":"2006-09-17",
+"end":"2006-09-17",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"T888GFE"}],
+"names":[{ "jsonmodel_type":"name_software",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"dacs",
+"software_name":"Name Number 602",
+"sort_name":"SORT y - 519"}],
+"agent_type":"agent_software"}' \
+  "http://localhost:8089/agents/software"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/software 
+```[:POST] /agents/software ```
 
 __Description__
 
@@ -823,46 +1037,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_software",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"existence",
-"begin":"2017-07-31",
-"end":"2017-07-31",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"392A291N230"}],
-"names":[{ "jsonmodel_type":"name_software",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"local",
-"software_name":"Name Number 627",
-"sort_name":"SORT f - 543"}],
-"agent_type":"agent_software"}' \
-  "http://localhost:8089//agents/software"
+
+
+## List all software agents
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/software?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/software?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/software?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/software 
+```[:GET] /agents/software ```
 
 __Description__
 
@@ -877,21 +1080,58 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:agent_software)]
+  	200 -- [(:agent_software)]
 
 
-```shell 
+
+
+## Update a software agent
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"agent_software",
+"agent_contacts":[],
+"linked_agent_roles":[],
+"external_documents":[],
+"notes":[],
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"dates_of_existence":[{ "jsonmodel_type":"date",
+"date_type":"range",
+"label":"existence",
+"begin":"2006-09-17",
+"end":"2006-09-17",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"T888GFE"}],
+"names":[{ "jsonmodel_type":"name_software",
+"use_dates":[],
+"authorized":false,
+"is_display_name":false,
+"sort_name_auto_generate":true,
+"rules":"dacs",
+"software_name":"Name Number 602",
+"sort_name":"SORT y - 519"}],
+"agent_type":"agent_software"}' \
+  "http://localhost:8089/agents/software/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /agents/software/:id 
+```[:POST] /agents/software/:id ```
 
 __Description__
 
@@ -906,47 +1146,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a software agent by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"agent_software",
-"agent_contacts":[],
-"linked_agent_roles":[],
-"external_documents":[],
-"notes":[],
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"dates_of_existence":[{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"existence",
-"begin":"2017-07-31",
-"end":"2017-07-31",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"392A291N230"}],
-"names":[{ "jsonmodel_type":"name_software",
-"use_dates":[],
-"authorized":false,
-"is_display_name":false,
-"sort_name_auto_generate":true,
-"rules":"local",
-"software_name":"Name Number 627",
-"sort_name":"SORT f - 543"}],
-"agent_type":"agent_software"}' \
-  "http://localhost:8089//agents/software/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/agents/software/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /agents/software/:id 
+```[:GET] /agents/software/:id ```
 
 __Description__
 
@@ -957,27 +1187,32 @@ __Parameters__
 
 	Integer id -- ID of the software agent
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:agent)
-	404 -- Not found
+  	200 -- (:agent)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"S604164747300"' \
-  "http://localhost:8089//agents/software/1"
+
+
+## Delete a software agent
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/agents/software/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /agents/software/:id 
+```[:DELETE] /agents/software/:id ```
 
 __Description__
 
@@ -990,17 +1225,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Carry out delete requests against a list of records
+
+
+
+  
+  
+    
+      
+        
+      
     
   
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/batch_delete?record_uris=A854IWH"
 
 ```
 
+__Endpoint__
 
-## [:POST] /batch_delete 
+```[:POST] /batch_delete ```
 
 __Description__
 
@@ -1013,21 +1268,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## List records by their external ID(s)
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"VIV278E"' \
-  "http://localhost:8089//batch_delete"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/by-external-id?eid=551429GM673&type=850186XFP"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /by-external-id 
+```[:GET] /by-external-id ```
 
 __Description__
 
@@ -1038,32 +1315,36 @@ __Parameters__
 
 	String eid -- An external ID to find
 
-	[String] type -- The record type to search (useful if IDs may be shared between different types)
+	[String] type (Optional) -- The record type to search (useful if IDs may be shared between different types)
 
 __Returns__
 
-	303 -- A redirect to the URI named by the external ID (if there's only one)
-	300 -- A JSON-formatted list of URIs if there were multiple matches
-	404 -- No external ID matched
+  	303 -- A redirect to the URI named by the external ID (if there's only one)
+
+  	300 -- A JSON-formatted list of URIs if there were multiple matches
+
+  	404 -- No external ID matched
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"RF25K841"' \
-  "http://localhost:8089//by-external-id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"GLR65N"' \
-  "http://localhost:8089//by-external-id"
+
+
+## Get an Enumeration Value
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/config/enumeration_values/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /config/enumeration_values/:enum_val_id 
+```[:GET] /config/enumeration_values/:enum_val_id ```
 
 __Description__
 
@@ -1076,21 +1357,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:enumeration_value)
+  	200 -- (:enumeration_value)
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id"
+
+
+## Update an enumeration value
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/config/enumeration_values/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumeration_values/:enum_val_id 
+```[:POST] /config/enumeration_values/:enum_val_id ```
 
 __Description__
 
@@ -1105,27 +1394,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id"
+
+
+## Update the position of an ennumeration value
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/config/enumeration_values/1/position?position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumeration_values/:enum_val_id/position 
+```[:POST] /config/enumeration_values/:enum_val_id/position ```
 
 __Description__
 
@@ -1140,27 +1441,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id/position"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id/position"
+
+
+## Suppress this value
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/config/enumeration_values/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumeration_values/:enum_val_id/suppressed 
+```[:POST] /config/enumeration_values/:enum_val_id/suppressed ```
 
 __Description__
 
@@ -1175,27 +1488,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//config/enumeration_values/:enum_val_id/suppressed"
+
+
+## List all defined enumerations
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/config/enumerations"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /config/enumerations 
+```[:GET] /config/enumerations ```
 
 __Description__
 
@@ -1206,16 +1522,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:enumeration)]
+  	200 -- [(:enumeration)]
 
 
-```shell 
+
+
+## Create an enumeration
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/config/enumerations"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumerations 
+```[:POST] /config/enumerations ```
 
 __Description__
 
@@ -1228,22 +1557,31 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
+
+
+## Update an enumeration
+
+
+
+
+  
+  
+
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//config/enumerations"
-  
+  "http://localhost:8089/config/enumerations/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumerations/:enum_id 
+```[:POST] /config/enumerations/:enum_id ```
 
 __Description__
 
@@ -1258,27 +1596,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumerations/:enum_id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//config/enumerations/:enum_id"
+
+
+## Get an Enumeration
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/config/enumerations/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /config/enumerations/:enum_id 
+```[:GET] /config/enumerations/:enum_id ```
 
 __Description__
 
@@ -1291,21 +1632,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:enumeration)
+  	200 -- (:enumeration)
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//config/enumerations/:enum_id"
+
+
+## Migrate all records from using one value to another
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/config/enumerations/migration"
 
 ```
 
+__Endpoint__
 
-## [:POST] /config/enumerations/migration 
+```[:POST] /config/enumerations/migration ```
 
 __Description__
 
@@ -1318,22 +1667,72 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//config/enumerations/migration"
+
+
+## Get an Enumeration by Name
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/config/enumerations/names/1"
   
 
 ```
 
+__Endpoint__
 
-## [:POST] /container_profiles 
+```[:GET] /config/enumerations/names/:enum_name ```
+
+__Description__
+
+Get an Enumeration by Name
+
+__Parameters__
+
+
+	String enum_name -- The name of the enumeration to retrieve
+
+__Returns__
+
+  	200 -- (:enumeration)
+
+
+
+
+## Create a Container_Profile
+
+
+
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"container_profile",
+"name":"FJX425D",
+"url":"AM99XS",
+"dimension_units":"meters",
+"extent_dimension":"height",
+"depth":"28",
+"height":"35",
+"width":"87"}' \
+  "http://localhost:8089/container_profiles"
+
+```
+
+__Endpoint__
+
+```[:POST] /container_profiles ```
 
 __Description__
 
@@ -1346,28 +1745,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"container_profile",
-"name":"RVWLM",
-"url":"IYKL54",
-"dimension_units":"yards",
-"extent_dimension":"height",
-"depth":"55",
-"height":"34",
-"width":"47"}' \
-  "http://localhost:8089//container_profiles"
+
+
+## Get a list of Container Profiles
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/container_profiles?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/container_profiles?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/container_profiles?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /container_profiles 
+```[:GET] /container_profiles ```
 
 __Description__
 
@@ -1382,21 +1786,41 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:container_profile)]
+  	200 -- [(:container_profile)]
 
 
-```shell 
+
+
+## Update a Container Profile
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"container_profile",
+"name":"FJX425D",
+"url":"AM99XS",
+"dimension_units":"meters",
+"extent_dimension":"height",
+"depth":"28",
+"height":"35",
+"width":"87"}' \
+  "http://localhost:8089/container_profiles/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /container_profiles/:id 
+```[:POST] /container_profiles/:id ```
 
 __Description__
 
@@ -1411,29 +1835,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a Container Profile by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"container_profile",
-"name":"RVWLM",
-"url":"IYKL54",
-"dimension_units":"yards",
-"extent_dimension":"height",
-"depth":"55",
-"height":"34",
-"width":"47"}' \
-  "http://localhost:8089//container_profiles/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/container_profiles/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /container_profiles/:id 
+```[:GET] /container_profiles/:id ```
 
 __Description__
 
@@ -1444,26 +1874,30 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:container_profile)
+  	200 -- (:container_profile)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"949279OTF"' \
-  "http://localhost:8089//container_profiles/1"
+
+
+## Delete an Container Profile
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/container_profiles/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /container_profiles/:id 
+```[:DELETE] /container_profiles/:id ```
 
 __Description__
 
@@ -1476,17 +1910,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
+
+
+## Get the global Preferences records for the current user.
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/current_global_preferences"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /current_global_preferences 
+```[:GET] /current_global_preferences ```
 
 __Description__
 
@@ -1497,16 +1942,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- {(:preference)}
+  	200 -- {(:preference)}
 
 
-```shell 
+
+
+## Calculate the dates of an archival object tree
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/date_calculator?record_uri=519E807837R&label=22328E669Y"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /date_calculator 
+```[:GET] /date_calculator ```
 
 __Description__
 
@@ -1517,30 +1989,37 @@ __Parameters__
 
 	String record_uri -- The uri of the object
 
-	String label -- The date label to filter on
+	String label (Optional) -- The date label to filter on
 
 __Returns__
 
-	200 -- Calculation results
+  	200 -- Calculation results
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"DDN349908"' \
-  "http://localhost:8089//date_calculator"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"SQAXV"' \
-  "http://localhost:8089//date_calculator"
+
+
+## Get a stream of deleted records
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/delete-feed?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/delete-feed?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/delete-feed?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /delete-feed 
+```[:GET] /delete-feed ```
 
 __Description__
 
@@ -1555,21 +2034,48 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- a list of URIs that were deleted
+  	200 -- a list of URIs that were deleted
 
 
-```shell 
+
+
+## Calculate the extent of an archival object tree
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/extent_calculator?record_uri=X193KAB&unit=251351K465626"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /extent_calculator 
+```[:GET] /extent_calculator ```
 
 __Description__
 
@@ -1580,30 +2086,32 @@ __Parameters__
 
 	String record_uri -- The uri of the object
 
-	String unit -- The unit of measurement to use
+	String unit (Optional) -- The unit of measurement to use
 
 __Returns__
 
-	200 -- Calculation results
+  	200 -- Calculation results
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"SSNM441"' \
-  "http://localhost:8089//extent_calculator"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"R802CJ762"' \
-  "http://localhost:8089//extent_calculator"
+
+
+## List all supported job types
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/job_types"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /job_types 
+```[:GET] /job_types ```
 
 __Description__
 
@@ -1614,16 +2122,34 @@ __Parameters__
 
 __Returns__
 
-	200 -- A list of supported job types
+  	200 -- A list of supported job types
 
 
-```shell 
+
+
+## Create a Location_Profile
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"location_profile",
+"name":"152807202HA",
+"dimension_units":"yards",
+"depth":"50",
+"height":"57",
+"width":"2"}' \
+  "http://localhost:8089/location_profiles"
 
 ```
 
+__Endpoint__
 
-## [:POST] /location_profiles 
+```[:POST] /location_profiles ```
 
 __Description__
 
@@ -1636,26 +2162,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"location_profile",
-"name":"460640104972622",
-"dimension_units":"centimeters",
-"depth":"42",
-"height":"43",
-"width":"29"}' \
-  "http://localhost:8089//location_profiles"
+
+
+## Get a list of Location Profiles
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/location_profiles?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/location_profiles?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/location_profiles?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /location_profiles 
+```[:GET] /location_profiles ```
 
 __Description__
 
@@ -1670,21 +2203,39 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:location_profile)]
+  	200 -- [(:location_profile)]
 
 
-```shell 
+
+
+## Update a Location Profile
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"location_profile",
+"name":"152807202HA",
+"dimension_units":"yards",
+"depth":"50",
+"height":"57",
+"width":"2"}' \
+  "http://localhost:8089/location_profiles/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /location_profiles/:id 
+```[:POST] /location_profiles/:id ```
 
 __Description__
 
@@ -1699,27 +2250,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a Location Profile by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"location_profile",
-"name":"460640104972622",
-"dimension_units":"centimeters",
-"depth":"42",
-"height":"43",
-"width":"29"}' \
-  "http://localhost:8089//location_profiles/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/location_profiles/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /location_profiles/:id 
+```[:GET] /location_profiles/:id ```
 
 __Description__
 
@@ -1730,26 +2289,30 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:location_profile)
+  	200 -- (:location_profile)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"F242YGA"' \
-  "http://localhost:8089//location_profiles/1"
+
+
+## Delete an Location Profile
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/location_profiles/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /location_profiles/:id 
+```[:DELETE] /location_profiles/:id ```
 
 __Description__
 
@@ -1762,17 +2325,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
+
+
+## Create a Location
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"location",
+"external_ids":[],
+"functions":[],
+"building":"147 W 4th Street",
+"floor":"8",
+"room":"15",
+"area":"Front",
+"barcode":"01011001011100111100",
+"temporary":"exhibit"}' \
+  "http://localhost:8089/locations"
 
 ```
 
+__Endpoint__
 
-## [:POST] /locations 
+```[:POST] /locations ```
 
 __Description__
 
@@ -1785,29 +2368,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"location",
-"external_ids":[],
-"functions":[],
-"building":"170 W 9th Street",
-"floor":"0",
-"room":"7",
-"area":"Back",
-"barcode":"00110101011011001010",
-"temporary":"reading_room"}' \
-  "http://localhost:8089//locations"
+
+
+## Get a list of locations
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/locations?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/locations?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/locations?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /locations 
+```[:GET] /locations ```
 
 __Description__
 
@@ -1822,21 +2409,42 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:location)]
+  	200 -- [(:location)]
 
 
-```shell 
+
+
+## Update a Location
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"location",
+"external_ids":[],
+"functions":[],
+"building":"147 W 4th Street",
+"floor":"8",
+"room":"15",
+"area":"Front",
+"barcode":"01011001011100111100",
+"temporary":"exhibit"}' \
+  "http://localhost:8089/locations/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /locations/:id 
+```[:POST] /locations/:id ```
 
 __Description__
 
@@ -1851,30 +2459,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a Location by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"location",
-"external_ids":[],
-"functions":[],
-"building":"170 W 9th Street",
-"floor":"0",
-"room":"7",
-"area":"Back",
-"barcode":"00110101011011001010",
-"temporary":"reading_room"}' \
-  "http://localhost:8089//locations/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/locations/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /locations/:id 
+```[:GET] /locations/:id ```
 
 __Description__
 
@@ -1885,26 +2498,30 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:location)
+  	200 -- (:location)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"224CPB826"' \
-  "http://localhost:8089//locations/1"
+
+
+## Delete a Location
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/locations/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /locations/:id 
+```[:DELETE] /locations/:id ```
 
 __Description__
 
@@ -1917,17 +2534,38 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Create a Batch of Locations
+
+
+
+  
+  
+    
+      
+        
+      
     
   
+  
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/locations/batch?dry_run=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /locations/batch 
+```[:POST] /locations/batch ```
 
 __Description__
 
@@ -1936,32 +2574,35 @@ Create a Batch of Locations
 __Parameters__
 
 
-	RESTHelpers::BooleanParam dry_run -- If true, don't create the locations, just list them
+	RESTHelpers::BooleanParam dry_run (Optional) -- If true, don't create the locations, just list them
 
 	JSONModel(:location_batch) <request body> -- The location batch data to generate all locations
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//locations/batch"
-    
-     
+
+
+## Update a Location
+
+
+
+
+  
+  
+
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//locations/batch"
-  
+  "http://localhost:8089/locations/batch_update"
 
 ```
 
+__Endpoint__
 
-## [:POST] /locations/batch_update 
+```[:POST] /locations/batch_update ```
 
 __Description__
 
@@ -1974,21 +2615,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//locations/batch_update"
+
+
+## Log out the current session
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/logout"
 
 ```
 
+__Endpoint__
 
-## [:POST] /logout 
+```[:POST] /logout ```
 
 __Description__
 
@@ -1999,16 +2647,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- Session logged out
+  	200 -- Session logged out
 
 
-```shell 
+
+
+## Carry out a merge request against Agent records
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/merge_requests/agent"
 
 ```
 
+__Endpoint__
 
-## [:POST] /merge_requests/agent 
+```[:POST] /merge_requests/agent ```
 
 __Description__
 
@@ -2021,21 +2682,75 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Carry out a detailed merge request against Agent records
+
+
+
+  
+  
     
-     
+      
+        
+      
+    
+  
+  
+
+  
+  
+
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//merge_requests/agent"
-  
+  "http://localhost:8089/merge_requests/agent_detail?dry_run=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /merge_requests/digital_object 
+```[:POST] /merge_requests/agent_detail ```
+
+__Description__
+
+Carry out a detailed merge request against Agent records
+
+__Parameters__
+
+
+	RESTHelpers::BooleanParam dry_run (Optional) -- If true, don't process the merge, just display the merged record
+
+	JSONModel(:merge_request_detail) <request body> -- A detailed merge request
+
+__Returns__
+
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+
+
+
+## Carry out a merge request against Digital_Object records
+
+
+
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/merge_requests/digital_object"
+
+```
+
+__Endpoint__
+
+```[:POST] /merge_requests/digital_object ```
 
 __Description__
 
@@ -2050,26 +2765,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//merge_requests/digital_object"
-    
-     
+
+
+## Carry out a merge request against Resource records
+
+
+
+
+  
+  
+
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//merge_requests/digital_object"
-  
+  "http://localhost:8089/merge_requests/resource"
 
 ```
 
+__Endpoint__
 
-## [:POST] /merge_requests/resource 
+```[:POST] /merge_requests/resource ```
 
 __Description__
 
@@ -2084,26 +2802,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//merge_requests/resource"
-    
-     
+
+
+## Carry out a merge request against Subject records
+
+
+
+
+  
+  
+
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//merge_requests/resource"
-  
+  "http://localhost:8089/merge_requests/subject"
 
 ```
 
+__Endpoint__
 
-## [:POST] /merge_requests/subject 
+```[:POST] /merge_requests/subject ```
 
 __Description__
 
@@ -2116,21 +2837,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a stream of notifications
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//merge_requests/subject"
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/notifications?last_sequence=1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /notifications 
+```[:GET] /notifications ```
 
 __Description__
 
@@ -2139,114 +2876,41 @@ Get a stream of notifications
 __Parameters__
 
 
-	Integer last_sequence -- The last sequence number seen
+	Integer last_sequence (Optional) -- The last sequence number seen
 
 __Returns__
 
-	200 -- a list of notifications
+  	200 -- a list of notifications
 
 
-```shell 
+
+
+## Get a list of Permissions
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//notifications"
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/permissions?level=NQ445E221"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /oai 
-
-__Description__
-
-Handle an OAI request
-
-__Parameters__
-
-
-	String verb -- The OAI verb (Identify, ListRecords, GetRecord, etc.)
-
-	String metadataPrefix -- One of the supported metadata types.  See verb=ListMetadataFormats for a list.
-
-	String from -- Start date (yyyy-mm-dd, yyyy-mm-ddThh:mm:ssZ)
-
-	String until -- End date (yyyy-mm-dd, yyyy-mm-ddThh:mm:ssZ)
-
-	String resumptionToken -- The OAI resumption token
-
-	String set -- Requested OAI set (see ?verb=Identify for available sets)
-
-	String identifier -- The requested record identifier (for ?verb=GetRecord)
-
-__Returns__
-
-	200 -- OAI response
-
-
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"TC298494I"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"LWQGR"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"765JQP228"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"C773P166388"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"261JJ211H"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"TWW951520"' \
-  "http://localhost:8089//oai"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"743CEXG"' \
-  "http://localhost:8089//oai"
-  
-
-```
-
-
-## [:GET] /oai_sample 
-
-__Description__
-
-A HTML form to generate one sample OAI requests
-
-__Parameters__
-
-
-__Returns__
-
-	200 -- HTML
-
-
-```shell 
-  
-
-```
-
-
-## [:GET] /permissions 
+```[:GET] /permissions ```
 
 __Description__
 
@@ -2259,21 +2923,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:permission)]
+  	200 -- [(:permission)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"493406878TL"' \
-  "http://localhost:8089//permissions"
+
+
+## List all reports
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/reports"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /reports 
+```[:GET] /reports ```
 
 __Description__
 
@@ -2284,16 +2955,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- report list in json
+  	200 -- report list in json
 
 
-```shell 
+
+
+## Get a static asset for a report
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/reports/static/*?splat=458RJ128693"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /reports/static/* 
+```[:GET] /reports/static/* ```
 
 __Description__
 
@@ -2306,21 +2998,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- the asset
+  	200 -- the asset
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"120DF223U"' \
-  "http://localhost:8089//reports/static/*"
+
+
+## Create a Repository
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories 
+```[:POST] /repositories ```
 
 __Description__
 
@@ -2333,23 +3033,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	403 -- access_denied
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	403 -- access_denied
 
 
-```shell 
+
+
+## Get a list of Repositories
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories 
+```[:GET] /repositories ```
 
 __Description__
 
@@ -2358,25 +3074,33 @@ Get a list of Repositories
 __Parameters__
 
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- [(:repository)]
+  	200 -- [(:repository)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"EG732762322"' \
-  "http://localhost:8089//repositories"
+
+
+## Update a repository
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:id 
+```[:POST] /repositories/:id ```
 
 __Description__
 
@@ -2391,22 +3115,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a Repository by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:id 
+```[:GET] /repositories/:id ```
 
 __Description__
 
@@ -2417,27 +3154,32 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:repository)
-	404 -- Not found
+  	200 -- (:repository)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"F439BXX"' \
-  "http://localhost:8089//repositories/1"
+
+
+## Delete a Repository
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id 
+```[:DELETE] /repositories/:repo_id ```
 
 __Description__
 
@@ -2450,41 +3192,20 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id"
+
+
+## Create an Accession
+
+
+
+
+  
   
 
-```
-
-
-## [:POST] /repositories/:repo_id/accessions 
-
-__Description__
-
-Create an Accession
-
-__Parameters__
-
-
-	JSONModel(:accession) <request body> -- The record to create
-
-	Integer repo_id -- The Repository ID -- The Repository must exist
-
-__Returns__
-
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-
-
-```shell 
-    
-     
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '{ "jsonmodel_type":"accession",
 "external_ids":[],
@@ -2503,26 +3224,62 @@ curl -H "X-ArchivesSpace-Session: $SESSION" \
 "use_restrictions":false,
 "linked_agents":[],
 "instances":[],
-"id_0":"HN18454764",
-"id_1":"787T621V637",
-"id_2":"PTYUU",
-"id_3":"DP66DQ",
-"title":"Accession Title: 366",
-"content_description":"Description: 286",
-"condition_description":"Description: 287",
-"accession_date":"2010-09-27"}' \
-  "http://localhost:8089//repositories/:repo_id/accessions"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions"
+"id_0":"349K102402T",
+"id_1":"233EIWA",
+"id_2":"A214994P652",
+"id_3":"G94B60508",
+"title":"Accession Title: 375",
+"content_description":"Description: 274",
+"condition_description":"Description: 275",
+"accession_date":"1989-07-08"}' \
+  "http://localhost:8089/repositories/2/accessions"
+
+```
+
+__Endpoint__
+
+```[:POST] /repositories/:repo_id/accessions ```
+
+__Description__
+
+Create an Accession
+
+__Parameters__
+
+
+	JSONModel(:accession) <request body> -- The record to create
+
+	Integer repo_id -- The Repository ID -- The Repository must exist
+
+__Returns__
+
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+
+
+
+## Get a list of Accessions for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/accessions?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/accessions?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/accessions?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/accessions 
+```[:GET] /repositories/:repo_id/accessions ```
 
 __Description__
 
@@ -2537,28 +3294,60 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:accession)]
+  	200 -- [(:accession)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions"
+
+
+## Update an Accession
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"accession",
+"external_ids":[],
+"related_accessions":[],
+"classifications":[],
+"subjects":[],
+"linked_events":[],
+"extents":[],
+"dates":[],
+"external_documents":[],
+"rights_statements":[],
+"deaccessions":[],
+"related_resources":[],
+"restrictions_apply":false,
+"access_restrictions":false,
+"use_restrictions":false,
+"linked_agents":[],
+"instances":[],
+"id_0":"349K102402T",
+"id_1":"233EIWA",
+"id_2":"A214994P652",
+"id_3":"G94B60508",
+"title":"Accession Title: 375",
+"content_description":"Description: 274",
+"condition_description":"Description: 275",
+"accession_date":"1989-07-08"}' \
+  "http://localhost:8089/repositories/2/accessions/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/accessions/:id 
+```[:POST] /repositories/:repo_id/accessions/:id ```
 
 __Description__
 
@@ -2575,51 +3364,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get an Accession by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"accession",
-"external_ids":[],
-"related_accessions":[],
-"classifications":[],
-"subjects":[],
-"linked_events":[],
-"extents":[],
-"dates":[],
-"external_documents":[],
-"rights_statements":[],
-"deaccessions":[],
-"related_resources":[],
-"restrictions_apply":false,
-"access_restrictions":false,
-"use_restrictions":false,
-"linked_agents":[],
-"instances":[],
-"id_0":"HN18454764",
-"id_1":"787T621V637",
-"id_2":"PTYUU",
-"id_3":"DP66DQ",
-"title":"Accession Title: 366",
-"content_description":"Description: 286",
-"condition_description":"Description: 287",
-"accession_date":"2010-09-27"}' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/accessions/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/accessions/:id 
+```[:GET] /repositories/:repo_id/accessions/:id ```
 
 __Description__
 
@@ -2632,31 +3405,30 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:accession)
+  	200 -- (:accession)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"112UOO103"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1"
+
+
+## Delete an Accession
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/accessions/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/accessions/:id 
+```[:DELETE] /repositories/:repo_id/accessions/:id ```
 
 __Description__
 
@@ -2671,22 +3443,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1"
+
+
+## Suppress this record
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/accessions/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/accessions/:id/suppressed 
+```[:POST] /repositories/:repo_id/accessions/:id/suppressed ```
 
 __Description__
 
@@ -2703,27 +3490,84 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
+
+
+## Get Top Containers linked to an Accession
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1/suppressed"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/accessions/1/top_containers?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/accessions/:id/transfer 
+```[:GET] /repositories/:repo_id/accessions/:id/top_containers ```
+
+__Description__
+
+Get Top Containers linked to an Accession
+
+__Parameters__
+
+
+	Integer id -- The ID of the record
+
+	Integer repo_id -- The Repository ID -- The Repository must exist
+
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
+
+__Returns__
+
+  	200 -- a list of linked top containers
+
+  	404 -- Not found
+
+
+
+
+## Transfer this record to a different repository
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/accessions/1/transfer?target_repo=L107874212O"
+
+```
+
+__Endpoint__
+
+```[:POST] /repositories/:repo_id/accessions/:id/transfer ```
 
 __Description__
 
@@ -2740,27 +3584,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- moved
+  	200 -- moved
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"SI578471T"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1/transfer"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/accessions/1/transfer"
+
+
+## Get metadata for an EAC-CPF export of a corporate entity
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/corporate_entities/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/corporate_entities/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/archival_contexts/corporate_entities/:id.:fmt/metadata ```
 
 __Description__
 
@@ -2775,22 +3620,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/corporate_entities/1.:fmt/metadata"
+
+
+## Get an EAC-CPF representation of a Corporate Entity
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/corporate_entities/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/corporate_entities/:id.xml 
+```[:GET] /repositories/:repo_id/archival_contexts/corporate_entities/:id.xml ```
 
 __Description__
 
@@ -2805,22 +3656,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:agent)
+  	200 -- (:agent)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/corporate_entities/1.xml"
+
+
+## Get metadata for an EAC-CPF export of a family
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/families/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/families/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/archival_contexts/families/:id.:fmt/metadata ```
 
 __Description__
 
@@ -2835,22 +3692,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/families/1.:fmt/metadata"
+
+
+## Get an EAC-CPF representation of a Family
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/families/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/families/:id.xml 
+```[:GET] /repositories/:repo_id/archival_contexts/families/:id.xml ```
 
 __Description__
 
@@ -2865,22 +3728,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:agent)
+  	200 -- (:agent)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/families/1.xml"
+
+
+## Get metadata for an EAC-CPF export of a person
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/people/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/people/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/archival_contexts/people/:id.:fmt/metadata ```
 
 __Description__
 
@@ -2895,22 +3764,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/people/1.:fmt/metadata"
+
+
+## Get an EAC-CPF representation of an Agent
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/people/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/people/:id.xml 
+```[:GET] /repositories/:repo_id/archival_contexts/people/:id.xml ```
 
 __Description__
 
@@ -2925,22 +3800,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:agent)
+  	200 -- (:agent)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/people/1.xml"
+
+
+## Get metadata for an EAC-CPF export of a software
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/softwares/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/softwares/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/archival_contexts/softwares/:id.:fmt/metadata ```
 
 __Description__
 
@@ -2955,22 +3836,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/softwares/1.:fmt/metadata"
+
+
+## Get an EAC-CPF representation of a Software agent
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_contexts/softwares/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_contexts/softwares/:id.xml 
+```[:GET] /repositories/:repo_id/archival_contexts/softwares/:id.xml ```
 
 __Description__
 
@@ -2985,43 +3872,20 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:agent)
+  	200 -- (:agent)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_contexts/softwares/1.xml"
+
+
+## Create an Archival Object
+
+
+
+
+  
   
 
-```
-
-
-## [:POST] /repositories/:repo_id/archival_objects 
-
-__Description__
-
-Create an Archival Object
-
-__Parameters__
-
-
-	JSONModel(:archival_object) <request body> -- The record to create
-
-	Integer repo_id -- The Repository ID -- The Repository must exist
-
-__Returns__
-
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-
-
-```shell 
-    
-     
+```shell
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '{ "jsonmodel_type":"archival_object",
 "external_ids":[],
@@ -3036,22 +3900,60 @@ curl -H "X-ArchivesSpace-Session: $SESSION" \
 "ancestors":[],
 "instances":[],
 "notes":[],
-"ref_id":"785XDEH",
+"ref_id":"XVB593V",
 "level":"subseries",
-"title":"Archival Object Title: 367",
-"resource":{ "ref":"/repositories/2/resources/163"}}' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects"
+"title":"Archival Object Title: 376",
+"resource":{ "ref":"/repositories/2/resources/161"}}' \
+  "http://localhost:8089/repositories/2/archival_objects"
+
+```
+
+__Endpoint__
+
+```[:POST] /repositories/:repo_id/archival_objects ```
+
+__Description__
+
+Create an Archival Object
+
+__Parameters__
+
+
+	JSONModel(:archival_object) <request body> -- The record to create
+
+	Integer repo_id -- The Repository ID -- The Repository must exist
+
+__Returns__
+
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+
+
+
+## Get a list of Archival Objects for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_objects 
+```[:GET] /repositories/:repo_id/archival_objects ```
 
 __Description__
 
@@ -3066,28 +3968,52 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:archival_object)]
+  	200 -- [(:archival_object)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects"
+
+
+## Update an Archival Object
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"archival_object",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[],
+"dates":[],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"restrictions_apply":false,
+"ancestors":[],
+"instances":[],
+"notes":[],
+"ref_id":"XVB593V",
+"level":"subseries",
+"title":"Archival Object Title: 376",
+"resource":{ "ref":"/repositories/2/resources/161"}}' \
+  "http://localhost:8089/repositories/2/archival_objects/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/archival_objects/:id 
+```[:POST] /repositories/:repo_id/archival_objects/:id ```
 
 __Description__
 
@@ -3104,44 +4030,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get an Archival Object by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"archival_object",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[],
-"dates":[],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"restrictions_apply":false,
-"ancestors":[],
-"instances":[],
-"notes":[],
-"ref_id":"785XDEH",
-"level":"subseries",
-"title":"Archival Object Title: 367",
-"resource":{ "ref":"/repositories/2/resources/163"}}' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_objects/:id 
+```[:GET] /repositories/:repo_id/archival_objects/:id ```
 
 __Description__
 
@@ -3154,32 +4073,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:archival_object)
-	404 -- Not found
+  	200 -- (:archival_object)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"604729O842549"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1"
+
+
+## Delete an Archival Object
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/archival_objects/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/archival_objects/:id 
+```[:DELETE] /repositories/:repo_id/archival_objects/:id ```
 
 __Description__
 
@@ -3194,22 +4113,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1"
+
+
+## Move existing Archival Objects to become children of an Archival Object
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/archival_objects/1/accept_children?children=YP623200R&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/archival_objects/:id/accept_children 
+```[:POST] /repositories/:repo_id/archival_objects/:id/accept_children ```
 
 __Description__
 
@@ -3218,7 +4158,7 @@ Move existing Archival Objects to become children of an Archival Object
 __Parameters__
 
 
-	[String] children -- The children to move to the Archival Object
+	[String] children (Optional) -- The children to move to the Archival Object
 
 	Integer id -- The ID of the Archival Object to move children to
 
@@ -3228,34 +4168,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"P377EX665"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/accept_children"
+
+
+## Get the children of an Archival Object
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects/1/children"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_objects/:id/children 
+```[:GET] /repositories/:repo_id/archival_objects/:id/children ```
 
 __Description__
 
@@ -3270,23 +4208,31 @@ __Parameters__
 
 __Returns__
 
-	200 -- a list of archival object references
-	404 -- Not found
+  	200 -- a list of archival object references
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/children"
+
+
+## Batch create several Archival Objects as children of an existing Archival Object
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/archival_objects/1/children"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/archival_objects/:id/children 
+```[:POST] /repositories/:repo_id/archival_objects/:id/children ```
 
 __Description__
 
@@ -3303,29 +4249,47 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/children"
+
+
+## Set the parent/position of an Archival Object in a tree
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/archival_objects/1/parent?parent=1&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/archival_objects/:id/parent 
+```[:POST] /repositories/:repo_id/archival_objects/:id/parent ```
 
 __Description__
 
@@ -3336,41 +4300,38 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	Integer parent -- The parent of this node in the tree
+	Integer parent (Optional) -- The parent of this node in the tree
 
-	Integer position -- The position of this node in the tree
+	Integer position (Optional) -- The position of this node in the tree
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/parent"
+
+
+## Get the previous record in the tree for an Archival Object
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/archival_objects/1/previous"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/archival_objects/:id/previous 
+```[:GET] /repositories/:repo_id/archival_objects/:id/previous ```
 
 __Description__
 
@@ -3385,23 +4346,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:archival_object)
-	404 -- No previous node
+  	200 -- (:archival_object)
+
+  	404 -- No previous node
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/previous"
+
+
+## Suppress this record
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/archival_objects/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/archival_objects/:id/suppressed 
+```[:POST] /repositories/:repo_id/archival_objects/:id/suppressed ```
 
 __Description__
 
@@ -3418,27 +4395,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/archival_objects/1/suppressed"
+
+
+## Update this repository's assessment attribute definitions
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/assessment_attribute_definitions"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/assessment_attribute_definitions 
+```[:POST] /repositories/:repo_id/assessment_attribute_definitions ```
 
 __Description__
 
@@ -3453,26 +4432,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessment_attribute_definitions"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/assessment_attribute_definitions"
+
+
+## Get this repository's assessment attribute definitions
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/assessment_attribute_definitions"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/assessment_attribute_definitions 
+```[:GET] /repositories/:repo_id/assessment_attribute_definitions ```
 
 __Description__
 
@@ -3485,21 +4466,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:assessment_attribute_definitions)
+  	200 -- (:assessment_attribute_definitions)
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessment_attribute_definitions"
+
+
+## Create an Assessment
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/assessments"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/assessments 
+```[:POST] /repositories/:repo_id/assessments ```
 
 __Description__
 
@@ -3514,26 +4503,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/assessments"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessments"
+
+
+## Get a list of Assessments for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/assessments?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/assessments?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/assessments?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/assessments 
+```[:GET] /repositories/:repo_id/assessments ```
 
 __Description__
 
@@ -3548,28 +4544,36 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:assessment)]
+  	200 -- [(:assessment)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessments"
+
+
+## Update an Assessment
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/assessments/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/assessments/:id 
+```[:POST] /repositories/:repo_id/assessments/:id ```
 
 __Description__
 
@@ -3586,27 +4590,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get an Assessment by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/assessments/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessments/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/assessments/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/assessments/:id 
+```[:GET] /repositories/:repo_id/assessments/:id ```
 
 __Description__
 
@@ -3619,31 +4631,30 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:assessment)
+  	200 -- (:assessment)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessments/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"AYUIU"' \
-  "http://localhost:8089//repositories/:repo_id/assessments/1"
+
+
+## Delete an Assessment
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/assessments/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/assessments/:id 
+```[:DELETE] /repositories/:repo_id/assessments/:id ```
 
 __Description__
 
@@ -3658,22 +4669,44 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/assessments/1"
+
+
+## Import a batch of records
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"body_stream"' \
+  "http://localhost:8089/repositories/2/batch_imports?migration=JYQYW&skip_results=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/batch_imports 
+```[:POST] /repositories/:repo_id/batch_imports ```
 
 __Description__
 
@@ -3686,44 +4719,46 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String migration -- Param to indicate we are using a migrator
+	String migration (Optional) -- Param to indicate we are using a migrator
 
-	RESTHelpers::BooleanParam skip_results -- If true, don't return the list of created record URIs
+	RESTHelpers::BooleanParam skip_results (Optional) -- If true, don't return the list of created record URIs
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"body_stream"' \
-  "http://localhost:8089//repositories/:repo_id/batch_imports"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/batch_imports"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"K666UGU"' \
-  "http://localhost:8089//repositories/:repo_id/batch_imports"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/batch_imports"
+
+
+## Create a Classification Term
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"classification_term",
+"publish":true,
+"path_from_root":[],
+"linked_records":[],
+"identifier":"HCH700A",
+"title":"Classification Title: 378",
+"description":"Description: 277",
+"classification":{ "ref":"/repositories/2/classifications/12"}}' \
+  "http://localhost:8089/repositories/2/classification_terms"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classification_terms 
+```[:POST] /repositories/:repo_id/classification_terms ```
 
 __Description__
 
@@ -3738,34 +4773,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"classification_term",
-"publish":true,
-"path_from_root":[],
-"linked_records":[],
-"identifier":"H53147K683",
-"title":"Classification Title: 369",
-"description":"Description: 289",
-"classification":{ "ref":"/repositories/2/classifications/12"}}' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms"
+
+
+## Get a list of Classification Terms for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classification_terms?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classification_terms?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classification_terms?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classification_terms 
+```[:GET] /repositories/:repo_id/classification_terms ```
 
 __Description__
 
@@ -3780,28 +4816,43 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:classification_term)]
+  	200 -- [(:classification_term)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms"
+
+
+## Update a Classification Term
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"classification_term",
+"publish":true,
+"path_from_root":[],
+"linked_records":[],
+"identifier":"HCH700A",
+"title":"Classification Title: 378",
+"description":"Description: 277",
+"classification":{ "ref":"/repositories/2/classifications/12"}}' \
+  "http://localhost:8089/repositories/2/classification_terms/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classification_terms/:id 
+```[:POST] /repositories/:repo_id/classification_terms/:id ```
 
 __Description__
 
@@ -3818,35 +4869,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a Classification Term by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"classification_term",
-"publish":true,
-"path_from_root":[],
-"linked_records":[],
-"identifier":"H53147K683",
-"title":"Classification Title: 369",
-"description":"Description: 289",
-"classification":{ "ref":"/repositories/2/classifications/12"}}' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classification_terms/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classification_terms/:id 
+```[:GET] /repositories/:repo_id/classification_terms/:id ```
 
 __Description__
 
@@ -3859,32 +4912,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:classification_term)
-	404 -- Not found
+  	200 -- (:classification_term)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"T531150D533"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1"
+
+
+## Delete a Classification Term
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/classification_terms/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/classification_terms/:id 
+```[:DELETE] /repositories/:repo_id/classification_terms/:id ```
 
 __Description__
 
@@ -3899,22 +4952,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1"
+
+
+## Move existing Classification Terms to become children of another Classification Term
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/classification_terms/1/accept_children?children=GOR855W&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classification_terms/:id/accept_children 
+```[:POST] /repositories/:repo_id/classification_terms/:id/accept_children ```
 
 __Description__
 
@@ -3923,7 +4997,7 @@ Move existing Classification Terms to become children of another Classification 
 __Parameters__
 
 
-	[String] children -- The children to move to the Classification Term
+	[String] children (Optional) -- The children to move to the Classification Term
 
 	Integer id -- The ID of the Classification Term to move children to
 
@@ -3933,34 +5007,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"JL955FX"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/accept_children"
+
+
+## Get the children of a Classification Term
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classification_terms/1/children"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classification_terms/:id/children 
+```[:GET] /repositories/:repo_id/classification_terms/:id/children ```
 
 __Description__
 
@@ -3975,23 +5047,45 @@ __Parameters__
 
 __Returns__
 
-	200 -- a list of classification term references
-	404 -- Not found
+  	200 -- a list of classification term references
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/children"
+
+
+## Set the parent/position of a Classification Term in a tree
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/classification_terms/1/parent?parent=1&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classification_terms/:id/parent 
+```[:POST] /repositories/:repo_id/classification_terms/:id/parent ```
 
 __Description__
 
@@ -4002,41 +5096,45 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	Integer parent -- The parent of this node in the tree
+	Integer parent (Optional) -- The parent of this node in the tree
 
-	Integer position -- The position of this node in the tree
+	Integer position (Optional) -- The position of this node in the tree
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classification_terms/1/parent"
+
+
+## Create a Classification
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"classification",
+"publish":true,
+"path_from_root":[],
+"linked_records":[],
+"identifier":"H639OXW",
+"title":"Classification Title: 377",
+"description":"Description: 276"}' \
+  "http://localhost:8089/repositories/2/classifications"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classifications 
+```[:POST] /repositories/:repo_id/classifications ```
 
 __Description__
 
@@ -4051,33 +5149,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"classification",
-"publish":true,
-"path_from_root":[],
-"linked_records":[],
-"identifier":"XIJHP",
-"title":"Classification Title: 368",
-"description":"Description: 288"}' \
-  "http://localhost:8089//repositories/:repo_id/classifications"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications"
+
+
+## Get a list of Classifications for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications 
+```[:GET] /repositories/:repo_id/classifications ```
 
 __Description__
 
@@ -4092,28 +5192,42 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:classification)]
+  	200 -- [(:classification)]
 
 
-```shell 
+
+
+## Get a Classification
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id 
+```[:GET] /repositories/:repo_id/classifications/:id ```
 
 __Description__
 
@@ -4126,31 +5240,39 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:classification)
+  	200 -- (:classification)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"TY304O778"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1"
+
+
+## Update a Classification
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"classification",
+"publish":true,
+"path_from_root":[],
+"linked_records":[],
+"identifier":"H639OXW",
+"title":"Classification Title: 377",
+"description":"Description: 276"}' \
+  "http://localhost:8089/repositories/2/classifications/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classifications/:id 
+```[:POST] /repositories/:repo_id/classifications/:id ```
 
 __Description__
 
@@ -4167,34 +5289,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"classification",
-"publish":true,
-"path_from_root":[],
-"linked_records":[],
-"identifier":"XIJHP",
-"title":"Classification Title: 368",
-"description":"Description: 288"}' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1"
+
+
+## Delete a Classification
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/classifications/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/classifications/:id 
+```[:DELETE] /repositories/:repo_id/classifications/:id ```
 
 __Description__
 
@@ -4209,22 +5325,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1"
+
+
+## Move existing Classification Terms to become children of a Classification
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/classifications/1/accept_children?children=GL531LH&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/classifications/:id/accept_children 
+```[:POST] /repositories/:repo_id/classifications/:id/accept_children ```
 
 __Description__
 
@@ -4233,7 +5370,7 @@ Move existing Classification Terms to become children of a Classification
 __Parameters__
 
 
-	[String] children -- The children to move to the Classification
+	[String] children (Optional) -- The children to move to the Classification
 
 	Integer id -- The ID of the Classification to move children to
 
@@ -4243,34 +5380,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"444D719422G"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/accept_children"
+
+
+## Get a Classification tree
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1/tree"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id/tree 
+```[:GET] /repositories/:repo_id/classifications/:id/tree ```
 
 __Description__
 
@@ -4285,22 +5420,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- OK
+  	200 -- OK
 
 
-```shell 
+
+
+## Fetch tree information for an Classification Term record within a tree
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree"
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1/tree/node?node_uri=ML225OL&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id/tree/node 
+```[:GET] /repositories/:repo_id/classifications/:id/tree/node ```
 
 __Description__
 
@@ -4319,7 +5475,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
+  	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
 
   * title -- the collection title
 
@@ -4339,29 +5495,40 @@ __Returns__
     the information in this structure can save a backend call.
 
 
-```shell 
+
+
+## Fetch tree path from the root record to Classification Terms
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"209VO174764"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1/tree/node_from_root?node_ids=1&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id/tree/node_from_root 
+```[:GET] /repositories/:repo_id/classifications/:id/tree/node_from_root ```
 
 __Description__
 
@@ -4380,7 +5547,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
+  	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
 
   * node -- the URI of the node to next expand
 
@@ -4388,29 +5555,34 @@ __Returns__
     the path (or the desired record, if we're at the end of the path)
 
 
-```shell 
+
+
+## Fetch tree information for the top-level classification record
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/node_from_root"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1/tree/root?published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id/tree/root 
+```[:GET] /repositories/:repo_id/classifications/:id/tree/root ```
 
 __Description__
 
@@ -4427,7 +5599,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
+  	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
 
   * title -- the collection title
 
@@ -4440,24 +5612,46 @@ __Returns__
   * waypoint_size -- the number of children in each waypoint
 
 
-```shell 
+
+
+## Fetch the record slice for a given tree waypoint
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/root"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/root"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/classifications/1/tree/waypoint?offset=1&parent_node=PJN100L&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/classifications/:id/tree/waypoint 
+```[:GET] /repositories/:repo_id/classifications/:id/tree/waypoint ```
 
 __Description__
 
@@ -4472,13 +5666,13 @@ __Parameters__
 
 	Integer offset -- The page of records to return
 
-	String parent_node -- The URI of the parent of this waypoint (none for the root record)
+	String parent_node (Optional) -- The URI of the parent of this waypoint (none for the root record)
 
 	RESTHelpers::BooleanParam published_only -- Whether to restrict to published/unsuppressed items
 
 __Returns__
 
-	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
+  	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
 
   * title -- the record's title
 
@@ -4489,34 +5683,32 @@ __Returns__
   * parent_id -- the internal ID of this document's parent
 
 
-```shell 
+
+
+## Get a Collection Management Record by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"936104AD484"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/classifications/1/tree/waypoint"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/collection_management/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/collection_management/:id 
+```[:GET] /repositories/:repo_id/collection_management/:id ```
 
 __Description__
 
@@ -4529,31 +5721,47 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:collection_management)
+  	200 -- (:collection_management)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/collection_management/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"I715546929922"' \
-  "http://localhost:8089//repositories/:repo_id/collection_management/1"
+
+
+## Transfer components from one resource to another
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/component_transfers?target_resource=BH598M761&component=RV192841Q"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/component_transfers 
+```[:POST] /repositories/:repo_id/component_transfers ```
 
 __Description__
 
@@ -4570,33 +5778,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"ASU146S"' \
-  "http://localhost:8089//repositories/:repo_id/component_transfers"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"YDF534669"' \
-  "http://localhost:8089//repositories/:repo_id/component_transfers"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/component_transfers"
+
+
+## Get the Preferences records for the current repository and user.
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/current_preferences"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/current_preferences 
+```[:GET] /repositories/:repo_id/current_preferences ```
 
 __Description__
 
@@ -4609,21 +5816,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {(:preference)}
+  	200 -- {(:preference)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/current_preferences"
+
+
+## Save defaults for a record type
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/default_values/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/default_values/:record_type 
+```[:POST] /repositories/:repo_id/default_values/:record_type ```
 
 __Description__
 
@@ -4640,32 +5855,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/default_values/:record_type"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/default_values/:record_type"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"758158GLV"' \
-  "http://localhost:8089//repositories/:repo_id/default_values/:record_type"
+
+
+## Get default values for a record type
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/default_values/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/default_values/:record_type 
+```[:GET] /repositories/:repo_id/default_values/:record_type ```
 
 __Description__
 
@@ -4680,27 +5893,46 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/default_values/:record_type"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"ER517F388"' \
-  "http://localhost:8089//repositories/:repo_id/default_values/:record_type"
+
+
+## Create an Digital Object Component
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"digital_object_component",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[],
+"dates":[],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"file_versions":[],
+"notes":[],
+"component_id":"284128333EQ",
+"title":"Digital Object Component Title: 381",
+"digital_object":{ "ref":"/repositories/2/digital_objects/58"},
+"position":5,
+"has_unpublished_ancestor":true}' \
+  "http://localhost:8089/repositories/2/digital_object_components"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components 
+```[:POST] /repositories/:repo_id/digital_object_components ```
 
 __Description__
 
@@ -4715,42 +5947,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"digital_object_component",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[],
-"dates":[],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"file_versions":[],
-"notes":[],
-"component_id":"TX981IX",
-"title":"Digital Object Component Title: 372",
-"digital_object":{ "ref":"/repositories/2/digital_objects/56"},
-"position":10,
-"has_unpublished_ancestor":true}' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components"
+
+
+## Get a list of Digital Object Components for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_object_components?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_object_components?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_object_components?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_object_components 
+```[:GET] /repositories/:repo_id/digital_object_components ```
 
 __Description__
 
@@ -4765,28 +5990,51 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:digital_object_component)]
+  	200 -- [(:digital_object_component)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components"
+
+
+## Update an Digital Object Component
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"digital_object_component",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[],
+"dates":[],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"file_versions":[],
+"notes":[],
+"component_id":"284128333EQ",
+"title":"Digital Object Component Title: 381",
+"digital_object":{ "ref":"/repositories/2/digital_objects/58"},
+"position":5,
+"has_unpublished_ancestor":true}' \
+  "http://localhost:8089/repositories/2/digital_object_components/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components/:id 
+```[:POST] /repositories/:repo_id/digital_object_components/:id ```
 
 __Description__
 
@@ -4803,43 +6051,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get an Digital Object Component by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"digital_object_component",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[],
-"dates":[],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"file_versions":[],
-"notes":[],
-"component_id":"TX981IX",
-"title":"Digital Object Component Title: 372",
-"digital_object":{ "ref":"/repositories/2/digital_objects/56"},
-"position":10,
-"has_unpublished_ancestor":true}' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_object_components/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_object_components/:id 
+```[:GET] /repositories/:repo_id/digital_object_components/:id ```
 
 __Description__
 
@@ -4852,32 +6094,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:digital_object_component)
-	404 -- Not found
+  	200 -- (:digital_object_component)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"OAXGN"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1"
+
+
+## Delete a Digital Object Component
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/digital_object_components/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/digital_object_components/:id 
+```[:DELETE] /repositories/:repo_id/digital_object_components/:id ```
 
 __Description__
 
@@ -4892,22 +6134,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1"
+
+
+## Move existing Digital Object Components to become children of a Digital Object Component
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_object_components/1/accept_children?children=TO237FQ&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components/:id/accept_children 
+```[:POST] /repositories/:repo_id/digital_object_components/:id/accept_children ```
 
 __Description__
 
@@ -4916,7 +6179,7 @@ Move existing Digital Object Components to become children of a Digital Object C
 __Parameters__
 
 
-	[String] children -- The children to move to the Digital Object Component
+	[String] children (Optional) -- The children to move to the Digital Object Component
 
 	Integer id -- The ID of the Digital Object Component to move children to
 
@@ -4926,34 +6189,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"A954SG677"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/accept_children"
+
+
+## Batch create several Digital Object Components as children of an existing Digital Object Component
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/digital_object_components/1/children"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components/:id/children 
+```[:POST] /repositories/:repo_id/digital_object_components/:id/children ```
 
 __Description__
 
@@ -4970,29 +6232,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/children"
+
+
+## Get the children of an Digital Object Component
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_object_components/1/children"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_object_components/:id/children 
+```[:GET] /repositories/:repo_id/digital_object_components/:id/children ```
 
 __Description__
 
@@ -5007,23 +6272,45 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:digital_object_component)]
-	404 -- Not found
+  	200 -- [(:digital_object_component)]
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/children"
+
+
+## Set the parent/position of an Digital Object Component in a tree
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_object_components/1/parent?parent=1&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components/:id/parent 
+```[:POST] /repositories/:repo_id/digital_object_components/:id/parent ```
 
 __Description__
 
@@ -5034,41 +6321,47 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	Integer parent -- The parent of this node in the tree
+	Integer parent (Optional) -- The parent of this node in the tree
 
-	Integer position -- The position of this node in the tree
+	Integer position (Optional) -- The position of this node in the tree
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/parent"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/parent"
+
+
+## Suppress this record
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_object_components/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_object_components/:id/suppressed 
+```[:POST] /repositories/:repo_id/digital_object_components/:id/suppressed ```
 
 __Description__
 
@@ -5085,27 +6378,92 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_object_components/1/suppressed"
+
+
+## Create a Digital Object
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"digital_object",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[{ "jsonmodel_type":"extent",
+"portion":"part",
+"number":"82",
+"extent_type":"terabytes",
+"dimensions":"YCQKH",
+"physical_details":"G307903JO"}],
+"dates":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"creation",
+"begin":"2007-04-15",
+"end":"2007-04-15",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"HJES310"}],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"file_versions":[{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"X949O296130",
+"use_statement":"text-codebook",
+"xlink_actuate_attribute":"onRequest",
+"xlink_show_attribute":"none",
+"file_format_name":"gif",
+"file_format_version":"FESC308",
+"file_size_bytes":71,
+"checksum":"AFC624520",
+"checksum_method":"md5",
+"publish":true},
+{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"Y83811KG",
+"use_statement":"image-service-edited",
+"xlink_actuate_attribute":"onLoad",
+"xlink_show_attribute":"none",
+"file_format_name":"mp3",
+"file_format_version":"G171IEG",
+"file_size_bytes":34,
+"checksum":"WUTSI",
+"checksum_method":"sha-256",
+"publish":true},
+{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"QVY757412",
+"use_statement":"text-ocr-edited",
+"xlink_actuate_attribute":"none",
+"xlink_show_attribute":"replace",
+"file_format_name":"jpeg",
+"file_format_version":"D5JUM",
+"file_size_bytes":73,
+"checksum":"222QTAJ",
+"checksum_method":"sha-512",
+"publish":true}],
+"restrictions":false,
+"notes":[],
+"linked_instances":[],
+"title":"Digital Object Title: 380",
+"language":"fil",
+"digital_object_id":"P446HO680"}' \
+  "http://localhost:8089/repositories/2/digital_objects"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects 
+```[:POST] /repositories/:repo_id/digital_objects ```
 
 __Description__
 
@@ -5120,63 +6478,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"digital_object",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[{ "jsonmodel_type":"extent",
-"portion":"whole",
-"number":"21",
-"extent_type":"megabytes",
-"dimensions":"DXMI341"}],
-"dates":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"creation",
-"begin":"1998-12-29",
-"end":"1998-12-29",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"OPH651Y"},
-{ "jsonmodel_type":"date",
-"date_type":"inclusive",
-"label":"creation",
-"begin":"2017-02-18",
-"end":"2017-02-18",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"YV308MS"}],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"file_versions":[],
-"restrictions":false,
-"notes":[],
-"linked_instances":[],
-"title":"Digital Object Title: 371",
-"language":"ter",
-"digital_object_id":"X589295271P"}' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects"
+
+
+## Get a list of Digital Objects for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects 
+```[:GET] /repositories/:repo_id/digital_objects ```
 
 __Description__
 
@@ -5191,28 +6521,42 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:digital_object)]
+  	200 -- [(:digital_object)]
 
 
-```shell 
+
+
+## Get a Digital Object
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id 
+```[:GET] /repositories/:repo_id/digital_objects/:id ```
 
 __Description__
 
@@ -5225,31 +6569,96 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:digital_object)
+  	200 -- (:digital_object)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"JQ217130862"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1"
+
+
+## Update a Digital Object
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"digital_object",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[{ "jsonmodel_type":"extent",
+"portion":"part",
+"number":"82",
+"extent_type":"terabytes",
+"dimensions":"YCQKH",
+"physical_details":"G307903JO"}],
+"dates":[{ "jsonmodel_type":"date",
+"date_type":"bulk",
+"label":"creation",
+"begin":"2007-04-15",
+"end":"2007-04-15",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"HJES310"}],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"file_versions":[{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"X949O296130",
+"use_statement":"text-codebook",
+"xlink_actuate_attribute":"onRequest",
+"xlink_show_attribute":"none",
+"file_format_name":"gif",
+"file_format_version":"FESC308",
+"file_size_bytes":71,
+"checksum":"AFC624520",
+"checksum_method":"md5",
+"publish":true},
+{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"Y83811KG",
+"use_statement":"image-service-edited",
+"xlink_actuate_attribute":"onLoad",
+"xlink_show_attribute":"none",
+"file_format_name":"mp3",
+"file_format_version":"G171IEG",
+"file_size_bytes":34,
+"checksum":"WUTSI",
+"checksum_method":"sha-256",
+"publish":true},
+{ "jsonmodel_type":"file_version",
+"is_representative":false,
+"file_uri":"QVY757412",
+"use_statement":"text-ocr-edited",
+"xlink_actuate_attribute":"none",
+"xlink_show_attribute":"replace",
+"file_format_name":"jpeg",
+"file_format_version":"D5JUM",
+"file_size_bytes":73,
+"checksum":"222QTAJ",
+"checksum_method":"sha-512",
+"publish":true}],
+"restrictions":false,
+"notes":[],
+"linked_instances":[],
+"title":"Digital Object Title: 380",
+"language":"fil",
+"digital_object_id":"P446HO680"}' \
+  "http://localhost:8089/repositories/2/digital_objects/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id 
+```[:POST] /repositories/:repo_id/digital_objects/:id ```
 
 __Description__
 
@@ -5266,64 +6675,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"digital_object",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[{ "jsonmodel_type":"extent",
-"portion":"whole",
-"number":"21",
-"extent_type":"megabytes",
-"dimensions":"DXMI341"}],
-"dates":[{ "jsonmodel_type":"date",
-"date_type":"bulk",
-"label":"creation",
-"begin":"1998-12-29",
-"end":"1998-12-29",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"OPH651Y"},
-{ "jsonmodel_type":"date",
-"date_type":"inclusive",
-"label":"creation",
-"begin":"2017-02-18",
-"end":"2017-02-18",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"YV308MS"}],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"file_versions":[],
-"restrictions":false,
-"notes":[],
-"linked_instances":[],
-"title":"Digital Object Title: 371",
-"language":"ter",
-"digital_object_id":"X589295271P"}' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1"
+
+
+## Delete a Digital Object
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/digital_objects/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/digital_objects/:id 
+```[:DELETE] /repositories/:repo_id/digital_objects/:id ```
 
 __Description__
 
@@ -5338,22 +6711,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1"
+
+
+## Move existing Digital Object components to become children of a Digital Object
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_objects/1/accept_children?children=NQXRV&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id/accept_children 
+```[:POST] /repositories/:repo_id/digital_objects/:id/accept_children ```
 
 __Description__
 
@@ -5362,7 +6756,7 @@ Move existing Digital Object components to become children of a Digital Object
 __Parameters__
 
 
-	[String] children -- The children to move to the Digital Object
+	[String] children (Optional) -- The children to move to the Digital Object
 
 	Integer id -- The ID of the Digital Object to move children to
 
@@ -5372,34 +6766,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"GKIHG"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/accept_children"
+
+
+## Batch create several Digital Object Components as children of an existing Digital Object
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/digital_objects/1/children"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id/children 
+```[:POST] /repositories/:repo_id/digital_objects/:id/children ```
 
 __Description__
 
@@ -5416,29 +6809,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/children"
+
+
+## Publish a digital object and all its sub-records and components
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_objects/1/publish"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id/publish 
+```[:POST] /repositories/:repo_id/digital_objects/:id/publish ```
 
 __Description__
 
@@ -5453,23 +6849,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/publish"
+
+
+## Suppress this record
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_objects/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id/suppressed 
+```[:POST] /repositories/:repo_id/digital_objects/:id/suppressed ```
 
 __Description__
 
@@ -5486,27 +6898,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/suppressed"
+
+
+## Transfer this record to a different repository
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/digital_objects/1/transfer?target_repo=125HWF29"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/digital_objects/:id/transfer 
+```[:POST] /repositories/:repo_id/digital_objects/:id/transfer ```
 
 __Description__
 
@@ -5523,27 +6945,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- moved
+  	200 -- moved
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"OA807349400"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/transfer"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/transfer"
+
+
+## Get a Digital Object tree
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1/tree"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id/tree 
+```[:GET] /repositories/:repo_id/digital_objects/:id/tree ```
 
 __Description__
 
@@ -5558,22 +6981,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- OK
+  	200 -- OK
 
 
-```shell 
+
+
+## Fetch tree information for an Digital Object Component record within a tree
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree"
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1/tree/node?node_uri=321UBX339&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id/tree/node 
+```[:GET] /repositories/:repo_id/digital_objects/:id/tree/node ```
 
 __Description__
 
@@ -5592,7 +7036,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
+  	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
 
   * title -- the collection title
 
@@ -5612,29 +7056,40 @@ __Returns__
     the information in this structure can save a backend call.
 
 
-```shell 
+
+
+## Fetch tree paths from the root record to Digital Object Components
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"A824XP306"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1/tree/node_from_root?node_ids=1&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id/tree/node_from_root 
+```[:GET] /repositories/:repo_id/digital_objects/:id/tree/node_from_root ```
 
 __Description__
 
@@ -5653,7 +7108,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
+  	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
 
   * node -- the URI of the node to next expand
 
@@ -5661,29 +7116,34 @@ __Returns__
     the path (or the desired record, if we're at the end of the path)
 
 
-```shell 
+
+
+## Fetch tree information for the top-level digital object record
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/node_from_root"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1/tree/root?published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id/tree/root 
+```[:GET] /repositories/:repo_id/digital_objects/:id/tree/root ```
 
 __Description__
 
@@ -5700,7 +7160,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
+  	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
 
   * title -- the collection title
 
@@ -5713,24 +7173,46 @@ __Returns__
   * waypoint_size -- the number of children in each waypoint
 
 
-```shell 
+
+
+## Fetch the record slice for a given tree waypoint
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/root"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/root"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/1/tree/waypoint?offset=1&parent_node=C37218CW&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/:id/tree/waypoint 
+```[:GET] /repositories/:repo_id/digital_objects/:id/tree/waypoint ```
 
 __Description__
 
@@ -5745,13 +7227,13 @@ __Parameters__
 
 	Integer offset -- The page of records to return
 
-	String parent_node -- The URI of the parent of this waypoint (none for the root record)
+	String parent_node (Optional) -- The URI of the parent of this waypoint (none for the root record)
 
 	RESTHelpers::BooleanParam published_only -- Whether to restrict to published/unsuppressed items
 
 __Returns__
 
-	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
+  	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
 
   * title -- the record's title
 
@@ -5762,34 +7244,25 @@ __Returns__
   * parent_id -- the internal ID of this document's parent
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"IT501JD"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/1/tree/waypoint"
+
+
+## Get metadata for a Dublin Core export
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/dublin_core/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/dublin_core/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/digital_objects/dublin_core/:id.:fmt/metadata ```
 
 __Description__
 
@@ -5804,22 +7277,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/dublin_core/1.:fmt/metadata"
+
+
+## Get a Dublin Core representation of a Digital Object 
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/dublin_core/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/dublin_core/:id.xml 
+```[:GET] /repositories/:repo_id/digital_objects/dublin_core/:id.xml ```
 
 __Description__
 
@@ -5834,22 +7313,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:digital_object)
+  	200 -- (:digital_object)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/dublin_core/1.xml"
+
+
+## Get metadata for a METS export
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/mets/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/mets/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/digital_objects/mets/:id.:fmt/metadata ```
 
 __Description__
 
@@ -5864,22 +7349,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
+
+
+## Get a METS representation of a Digital Object 
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/mets/1.:fmt/metadata"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/mets/1.xml?dmd=IO681PH"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/mets/:id.xml 
+```[:GET] /repositories/:repo_id/digital_objects/mets/:id.xml ```
 
 __Description__
 
@@ -5892,24 +7392,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
+	String dmd (Optional) -- DMD Scheme to use
+
 __Returns__
 
-	200 -- (:digital_object)
+  	200 -- (:digital_object)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/mets/1.xml"
+
+
+## Get metadata for a MODS export
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/mods/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/mods/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/digital_objects/mods/:id.:fmt/metadata ```
 
 __Description__
 
@@ -5924,22 +7432,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/mods/1.:fmt/metadata"
+
+
+## Get a MODS representation of a Digital Object 
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/digital_objects/mods/1.xml"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/digital_objects/mods/:id.xml 
+```[:GET] /repositories/:repo_id/digital_objects/mods/:id.xml ```
 
 __Description__
 
@@ -5954,22 +7468,45 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:digital_object)
+  	200 -- (:digital_object)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/digital_objects/mods/1.xml"
+
+
+## Create an Event
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"event",
+"external_ids":[],
+"external_documents":[],
+"linked_agents":[{ "ref":"/agents/people/337",
+"role":"requester"}],
+"linked_records":[{ "ref":"/repositories/2/accessions/102",
+"role":"outcome"}],
+"date":{ "jsonmodel_type":"date",
+"date_type":"range",
+"label":"creation",
+"begin":"2018-11-17",
+"end":"2018-11-17",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"E12264494954"},
+"event_type":"processing_in_progress"}' \
+  "http://localhost:8089/repositories/2/events"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/events 
+```[:POST] /repositories/:repo_id/events ```
 
 __Description__
 
@@ -5984,43 +7521,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"event",
-"external_ids":[],
-"external_documents":[],
-"linked_agents":[{ "ref":"/agents/people/360",
-"role":"validator"}],
-"linked_records":[{ "ref":"/repositories/2/accessions/108",
-"role":"outcome"}],
-"date":{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"creation",
-"begin":"2017-02-11",
-"end":"2017-02-11",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"317G624AD"},
-"event_type":"processing_new"}' \
-  "http://localhost:8089//repositories/:repo_id/events"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events"
+
+
+## Get a list of Events for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/events?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/events?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/events?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/events 
+```[:GET] /repositories/:repo_id/events ```
 
 __Description__
 
@@ -6035,28 +7564,52 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:event)]
+  	200 -- [(:event)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events"
+
+
+## Update an Event
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"event",
+"external_ids":[],
+"external_documents":[],
+"linked_agents":[{ "ref":"/agents/people/337",
+"role":"requester"}],
+"linked_records":[{ "ref":"/repositories/2/accessions/102",
+"role":"outcome"}],
+"date":{ "jsonmodel_type":"date",
+"date_type":"range",
+"label":"creation",
+"begin":"2018-11-17",
+"end":"2018-11-17",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"E12264494954"},
+"event_type":"processing_in_progress"}' \
+  "http://localhost:8089/repositories/2/events/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/events/:id 
+```[:POST] /repositories/:repo_id/events/:id ```
 
 __Description__
 
@@ -6073,43 +7626,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get an Event by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"event",
-"external_ids":[],
-"external_documents":[],
-"linked_agents":[{ "ref":"/agents/people/360",
-"role":"validator"}],
-"linked_records":[{ "ref":"/repositories/2/accessions/108",
-"role":"outcome"}],
-"date":{ "jsonmodel_type":"date",
-"date_type":"range",
-"label":"creation",
-"begin":"2017-02-11",
-"end":"2017-02-11",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"317G624AD"},
-"event_type":"processing_new"}' \
-  "http://localhost:8089//repositories/:repo_id/events/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/events/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/events/:id 
+```[:GET] /repositories/:repo_id/events/:id ```
 
 __Description__
 
@@ -6122,32 +7667,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:event)
-	404 -- Not found
+  	200 -- (:event)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"X325358840S"' \
-  "http://localhost:8089//repositories/:repo_id/events/1"
+
+
+## Delete an event record
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/events/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/events/:id 
+```[:DELETE] /repositories/:repo_id/events/:id ```
 
 __Description__
 
@@ -6162,22 +7707,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events/1"
+
+
+## Suppress this record from non-managers
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/events/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/events/:id/suppressed 
+```[:POST] /repositories/:repo_id/events/:id/suppressed ```
 
 __Description__
 
@@ -6194,27 +7754,47 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
+
+
+## Find Archival Objects by ref_id or component_id
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/events/1/suppressed"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/events/1/suppressed"
+      
+        
+      
+    
+  
+    
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/find_by_id/archival_objects?ref_id=I306YFJ&component_id=AKTQA&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/find_by_id/archival_objects 
+```[:GET] /repositories/:repo_id/find_by_id/archival_objects ```
 
 __Description__
 
@@ -6225,44 +7805,49 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] ref_id -- A set of record Ref IDs
+	[String] ref_id (Optional) -- An archival object's Ref ID (param may be repeated)
 
-	[String] component_id -- A set of record component IDs
+	[String] component_id (Optional) -- An archival object's component ID (param may be repeated)
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- JSON array of refs
+  	200 -- JSON array of refs
 
 
-```shell 
+
+
+## Find Digital Object Components by component_id
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/archival_objects"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"OT325495R"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/archival_objects"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"USR321M"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/archival_objects"
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"456OK11L"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/archival_objects"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/find_by_id/digital_object_components?component_id=H848GW181&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/find_by_id/digital_object_components 
+```[:GET] /repositories/:repo_id/find_by_id/digital_object_components ```
 
 __Description__
 
@@ -6273,37 +7858,47 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] component_id -- A set of record component IDs
+	[String] component_id (Optional) -- A digital object component's component ID (param may be repeated)
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- JSON array of refs
+  	200 -- JSON array of refs
 
 
-```shell 
+
+
+## Find Digital Objects by digital_object_id
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_object_components"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"W259RO890"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_object_components"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"333JEV823"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_object_components"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/find_by_id/digital_objects?digital_object_id=UKPKL&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/find_by_id/digital_objects 
+```[:GET] /repositories/:repo_id/find_by_id/digital_objects ```
 
 __Description__
 
@@ -6314,37 +7909,47 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] digital_object_id -- A set of digital object IDs
+	[String] digital_object_id (Optional) -- A digital object's digital object ID (param may be repeated)
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- JSON array of refs
+  	200 -- JSON array of refs
 
 
-```shell 
+
+
+## Find Resources by their identifiers
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_objects"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"AVFUN"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_objects"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"CVY14I"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/digital_objects"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/find_by_id/resources?identifier=759BC49X&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/find_by_id/resources 
+```[:GET] /repositories/:repo_id/find_by_id/resources ```
 
 __Description__
 
@@ -6355,37 +7960,39 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] identifier -- A 4-part identifier expressed as JSON array (of up to 4 strings)
+	[String] identifier (Optional) -- A 4-part identifier expressed as a JSON array (of up to 4 strings) comprised of the id_0 to id_3 fields (though empty fields will be handled if not provided)
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- JSON array of refs
+  	200 -- JSON array of refs
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/resources"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"UU394574C"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/resources"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"625QLA368"' \
-  "http://localhost:8089//repositories/:repo_id/find_by_id/resources"
+
+
+## Create a group within a repository
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"group",
+"description":"Description: 282",
+"member_usernames":[],
+"grants_permissions":[],
+"group_code":"276PVLR"}' \
+  "http://localhost:8089/repositories/2/groups"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/groups 
+```[:POST] /repositories/:repo_id/groups ```
 
 __Description__
 
@@ -6400,32 +8007,41 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- conflict
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- conflict
 
 
-```shell 
+
+
+## Get a list of groups for a repository
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"group",
-"description":"Description: 294",
-"member_usernames":[],
-"grants_permissions":[],
-"group_code":"54GKQ566"}' \
-  "http://localhost:8089//repositories/:repo_id/groups"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/groups"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/groups?group_code=LIA191A"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/groups 
+```[:GET] /repositories/:repo_id/groups ```
 
 __Description__
 
@@ -6436,30 +8052,46 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String group_code -- Get groups by group code
+	String group_code (Optional) -- Get groups by group code
 
 __Returns__
 
-	200 -- [(:resource)]
+  	200 -- [(:resource)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/groups"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"98T578L633"' \
-  "http://localhost:8089//repositories/:repo_id/groups"
+
+
+## Update a group
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"group",
+"description":"Description: 282",
+"member_usernames":[],
+"grants_permissions":[],
+"group_code":"276PVLR"}' \
+  "http://localhost:8089/repositories/2/groups/1?with_members=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/groups/:id 
+```[:POST] /repositories/:repo_id/groups/:id ```
 
 __Description__
 
@@ -6478,38 +8110,41 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
-	409 -- conflict
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- conflict
 
 
-```shell 
+
+
+## Get a group by ID
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"group",
-"description":"Description: 294",
-"member_usernames":[],
-"grants_permissions":[],
-"group_code":"54GKQ566"}' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/groups/1?with_members=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/groups/:id 
+```[:GET] /repositories/:repo_id/groups/:id ```
 
 __Description__
 
@@ -6526,28 +8161,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:group)
-	404 -- Not found
+  	200 -- (:group)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
+
+
+## Delete a group by ID
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/groups/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/groups/:id 
+```[:DELETE] /repositories/:repo_id/groups/:id ```
 
 __Description__
 
@@ -6562,23 +8197,38 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:group)
-	404 -- Not found
+  	200 -- (:group)
+
+  	404 -- Not found
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/groups/1"
+
+
+## Create a new job
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"job",
+"status":"queued",
+"job":{ "jsonmodel_type":"import_job",
+"filenames":["658E644117I",
+"656Y513JS",
+"11I894X562",
+"61324T726730"],
+"import_type":"eac_xml"}}' \
+  "http://localhost:8089/repositories/2/jobs"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/jobs 
+```[:POST] /repositories/:repo_id/jobs ```
 
 __Description__
 
@@ -6593,33 +8243,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"job",
-"status":"queued",
-"job":{ "jsonmodel_type":"import_job",
-"filenames":["J442P927Q",
-"62EW209V",
-"EP31TT",
-"UYBP988"],
-"import_type":"eac_xml"}}' \
-  "http://localhost:8089//repositories/:repo_id/jobs"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs"
+
+
+## Get a list of Jobs for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs 
+```[:GET] /repositories/:repo_id/jobs ```
 
 __Description__
 
@@ -6634,28 +8284,33 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:job)]
+  	200 -- [(:job)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs"
+
+
+## Delete a Job
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/jobs/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/jobs/:id 
+```[:DELETE] /repositories/:repo_id/jobs/:id ```
 
 __Description__
 
@@ -6670,22 +8325,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Get a Job by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/:id 
+```[:GET] /repositories/:repo_id/jobs/:id ```
 
 __Description__
 
@@ -6696,33 +8364,34 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- (:job)
+  	200 -- (:job)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BFHJ823"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1"
+
+
+## Cancel a Job
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/jobs/1/cancel"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/jobs/:id/cancel 
+```[:POST] /repositories/:repo_id/jobs/:id/cancel ```
 
 __Description__
 
@@ -6737,22 +8406,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a Job's log by ID
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/cancel"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/log?offset=NonNegativeInteger"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/:id/log 
+```[:GET] /repositories/:repo_id/jobs/:id/log ```
 
 __Description__
 
@@ -6769,27 +8453,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The section of the import log between 'offset' and the end of file
+  	200 -- The section of the import log between 'offset' and the end of file
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/log"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"NonNegativeInteger"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/log"
+
+
+## Get a list of Job's output files by ID
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/output_files"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/:id/output_files 
+```[:GET] /repositories/:repo_id/jobs/:id/output_files ```
 
 __Description__
 
@@ -6804,22 +8489,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- An array of output files
+  	200 -- An array of output files
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/output_files"
+
+
+## Get a Job's output file by ID
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/output_files/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/:id/output_files/:file_id 
+```[:GET] /repositories/:repo_id/jobs/:id/output_files/:file_id ```
 
 __Description__
 
@@ -6836,27 +8527,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns the file
+  	200 -- Returns the file
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/output_files/:file_id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/output_files/:file_id"
+
+
+## Get a Job's list of created URIs
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/records?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/records?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/1/records?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/:id/records 
+```[:GET] /repositories/:repo_id/jobs/:id/records ```
 
 __Description__
 
@@ -6871,7 +8568,7 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer id -- The ID of the record
@@ -6880,22 +8577,35 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
 
 __Returns__
 
-	200 -- An array of created records
+  	200 -- An array of created records
 
 
-```shell 
+
+
+## Get a list of all active Jobs for a Repository
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/1/records"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/active?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/active 
+```[:GET] /repositories/:repo_id/jobs/active ```
 
 __Description__
 
@@ -6904,32 +8614,39 @@ Get a list of all active Jobs for a Repository
 __Parameters__
 
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:job)]
+  	200 -- [(:job)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"CS351318691"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/active"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/active"
+
+
+## Get a list of all archived Jobs for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/archived?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/archived?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/archived?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/archived 
+```[:GET] /repositories/:repo_id/jobs/archived ```
 
 __Description__
 
@@ -6944,35 +8661,37 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:job)]
+  	200 -- [(:job)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"B218553VU"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/archived"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/archived"
+
+
+## List all supported import job types
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/jobs/import_types"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/jobs/import_types 
+```[:GET] /repositories/:repo_id/jobs/import_types ```
 
 __Description__
 
@@ -6985,21 +8704,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- A list of supported import types
+  	200 -- A list of supported import types
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs/import_types"
+
+
+## Create a new job and post input files
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/jobs_with_files?job={"jsonmodel_type"=>"job", "status"=>"queued", "job"=>{"jsonmodel_type"=>"import_job", "filenames"=>["658E644117I", "656Y513JS", "11I894X562", "61324T726730"], "import_type"=>"eac_xml"}}&files=UploadFile"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/jobs_with_files 
+```[:POST] /repositories/:repo_id/jobs_with_files ```
 
 __Description__
 
@@ -7016,38 +8757,34 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"job",
-"status":"queued",
-"job":{ "jsonmodel_type":"import_job",
-"filenames":["J442P927Q",
-"62EW209V",
-"EP31TT",
-"UYBP988"],
-"import_type":"eac_xml"}}' \
-  "http://localhost:8089//repositories/:repo_id/jobs_with_files"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"UploadFile"' \
-  "http://localhost:8089//repositories/:repo_id/jobs_with_files"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/jobs_with_files"
+
+
+## Create a Preferences record
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"preference",
+"defaults":{ "jsonmodel_type":"defaults",
+"default_values":false,
+"note_order":[],
+"show_suppressed":false,
+"publish":false}}' \
+  "http://localhost:8089/repositories/2/preferences"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/preferences 
+```[:POST] /repositories/:repo_id/preferences ```
 
 __Description__
 
@@ -7062,32 +8799,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get a list of Preferences for a Repository and optionally a user
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"preference",
-"defaults":{ "jsonmodel_type":"defaults",
-"default_values":false,
-"note_order":[],
-"show_suppressed":false,
-"publish":false}}' \
-  "http://localhost:8089//repositories/:repo_id/preferences"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/preferences?user_id=1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/preferences 
+```[:GET] /repositories/:repo_id/preferences ```
 
 __Description__
 
@@ -7098,30 +8842,32 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	Integer user_id -- The username to retrieve defaults for
+	Integer user_id (Optional) -- The username to retrieve defaults for
 
 __Returns__
 
-	200 -- [(:preference)]
+  	200 -- [(:preference)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences"
+
+
+## Get a Preferences record
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/preferences/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/preferences/:id 
+```[:GET] /repositories/:repo_id/preferences/:id ```
 
 __Description__
 
@@ -7136,22 +8882,34 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:preference)
+  	200 -- (:preference)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences/1"
+
+
+## Update a Preferences record
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"preference",
+"defaults":{ "jsonmodel_type":"defaults",
+"default_values":false,
+"note_order":[],
+"show_suppressed":false,
+"publish":false}}' \
+  "http://localhost:8089/repositories/2/preferences/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/preferences/:id 
+```[:POST] /repositories/:repo_id/preferences/:id ```
 
 __Description__
 
@@ -7168,33 +8926,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"preference",
-"defaults":{ "jsonmodel_type":"defaults",
-"default_values":false,
-"note_order":[],
-"show_suppressed":false,
-"publish":false}}' \
-  "http://localhost:8089//repositories/:repo_id/preferences/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences/1"
+
+
+## Delete a Preferences record
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/preferences/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/preferences/:id 
+```[:DELETE] /repositories/:repo_id/preferences/:id ```
 
 __Description__
 
@@ -7209,22 +8962,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Get the default set of Preferences for a Repository and optionally a user
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/preferences/defaults?username=RVH853706"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/preferences/defaults 
+```[:GET] /repositories/:repo_id/preferences/defaults ```
 
 __Description__
 
@@ -7235,30 +9003,33 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String username -- The username to retrieve defaults for
+	String username (Optional) -- The username to retrieve defaults for
 
 __Returns__
 
-	200 -- (defaults)
+  	200 -- (defaults)
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/preferences/defaults"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"12887968FK"' \
-  "http://localhost:8089//repositories/:repo_id/preferences/defaults"
+
+
+## Create an RDE template
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/rde_templates"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/rde_templates 
+```[:POST] /repositories/:repo_id/rde_templates ```
 
 __Description__
 
@@ -7273,27 +9044,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/rde_templates"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/rde_templates"
+
+
+## Get a list of RDE Templates
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/rde_templates"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/rde_templates 
+```[:GET] /repositories/:repo_id/rde_templates ```
 
 __Description__
 
@@ -7306,21 +9080,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:rde_template)]
+  	200 -- [(:rde_template)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/rde_templates"
+
+
+## Get an RDE template record
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/rde_templates/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/rde_templates/:id 
+```[:GET] /repositories/:repo_id/rde_templates/:id ```
 
 __Description__
 
@@ -7335,22 +9116,26 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:rde_template)
+  	200 -- (:rde_template)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/rde_templates/1"
+
+
+## Delete an RDE Template
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/rde_templates/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/rde_templates/:id 
+```[:DELETE] /repositories/:repo_id/rde_templates/:id ```
 
 __Description__
 
@@ -7365,22 +9150,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/rde_templates/1"
+
+
+## Require fields for a record type
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/required_fields/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/required_fields/:record_type 
+```[:POST] /repositories/:repo_id/required_fields/:record_type ```
 
 __Description__
 
@@ -7397,32 +9189,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/required_fields/:record_type"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/required_fields/:record_type"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"91859I484I"' \
-  "http://localhost:8089//repositories/:repo_id/required_fields/:record_type"
+
+
+## Get required fields for a record type
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/required_fields/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/required_fields/:record_type 
+```[:GET] /repositories/:repo_id/required_fields/:record_type ```
 
 __Description__
 
@@ -7437,27 +9227,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
+
+
+## Get export metadata for a Resource Description
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/required_fields/:record_type"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BLNIT"' \
-  "http://localhost:8089//repositories/:repo_id/required_fields/:record_type"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resource_descriptions/1.:fmt/metadata?fmt=DGVPG"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resource_descriptions/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/resource_descriptions/:id.:fmt/metadata ```
 
 __Description__
 
@@ -7470,31 +9272,65 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String fmt -- Format of the request
+	String fmt (Optional) -- Format of the request
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
+
+
+## Get an EAD representation of a Resource
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.:fmt/metadata"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"821SS95393"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.:fmt/metadata"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resource_descriptions/1.pdf?include_unpublished=true&include_daos=true&numbered_cs=true&print_pdf=true&ead3=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resource_descriptions/:id.pdf 
+```[:GET] /repositories/:repo_id/resource_descriptions/:id.pdf ```
 
 __Description__
 
@@ -7505,61 +9341,75 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	RESTHelpers::BooleanParam include_unpublished -- Include unpublished records
+	RESTHelpers::BooleanParam include_unpublished (Optional) -- Include unpublished records
 
-	RESTHelpers::BooleanParam include_daos -- Include digital objects in dao tags
+	RESTHelpers::BooleanParam include_daos (Optional) -- Include digital objects in dao tags
 
-	RESTHelpers::BooleanParam numbered_cs -- Use numbered <c> tags in ead
+	RESTHelpers::BooleanParam numbered_cs (Optional) -- Use numbered <c> tags in ead
 
-	RESTHelpers::BooleanParam print_pdf -- Print EAD to pdf
+	RESTHelpers::BooleanParam print_pdf (Optional) -- Print EAD to pdf
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	RESTHelpers::BooleanParam ead3 -- Export using EAD3 schema
+	RESTHelpers::BooleanParam ead3 (Optional) -- Export using EAD3 schema
 
 __Returns__
 
-	200 -- (:resource)
+  	200 -- (:resource)
 
 
-```shell 
+
+
+## Get an EAD representation of a Resource
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.pdf"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resource_descriptions/1.xml?include_unpublished=true&include_daos=true&numbered_cs=true&print_pdf=true&ead3=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resource_descriptions/:id.xml 
+```[:GET] /repositories/:repo_id/resource_descriptions/:id.xml ```
 
 __Description__
 
@@ -7570,61 +9420,42 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	RESTHelpers::BooleanParam include_unpublished -- Include unpublished records
+	RESTHelpers::BooleanParam include_unpublished (Optional) -- Include unpublished records
 
-	RESTHelpers::BooleanParam include_daos -- Include digital objects in dao tags
+	RESTHelpers::BooleanParam include_daos (Optional) -- Include digital objects in dao tags
 
-	RESTHelpers::BooleanParam numbered_cs -- Use numbered <c> tags in ead
+	RESTHelpers::BooleanParam numbered_cs (Optional) -- Use numbered <c> tags in ead
 
-	RESTHelpers::BooleanParam print_pdf -- Print EAD to pdf
+	RESTHelpers::BooleanParam print_pdf (Optional) -- Print EAD to pdf
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	RESTHelpers::BooleanParam ead3 -- Export using EAD3 schema
+	RESTHelpers::BooleanParam ead3 (Optional) -- Export using EAD3 schema
 
 __Returns__
 
-	200 -- (:resource)
+  	200 -- (:resource)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resource_descriptions/1.xml"
+
+
+## Get export metadata for Resource labels
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resource_labels/1.:fmt/metadata"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resource_labels/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/resource_labels/:id.:fmt/metadata ```
 
 __Description__
 
@@ -7639,22 +9470,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resource_labels/1.:fmt/metadata"
+
+
+## Get a tsv list of printable labels for a Resource
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resource_labels/1.tsv"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resource_labels/:id.tsv 
+```[:GET] /repositories/:repo_id/resource_labels/:id.tsv ```
 
 __Description__
 
@@ -7669,22 +9506,84 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:resource)
+  	200 -- (:resource)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resource_labels/1.tsv"
+
+
+## Create a Resource
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"resource",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[{ "jsonmodel_type":"extent",
+"portion":"part",
+"number":"35",
+"extent_type":"terabytes",
+"dimensions":"SGER537",
+"physical_details":"778130656IO"}],
+"dates":[{ "jsonmodel_type":"date",
+"date_type":"single",
+"label":"creation",
+"begin":"2007-08-31",
+"end":"2007-08-31",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"DVGVC"},
+{ "jsonmodel_type":"date",
+"date_type":"single",
+"label":"creation",
+"begin":"1973-08-15",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"TRB50X"}],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"restrictions":false,
+"revision_statements":[{ "jsonmodel_type":"revision_statement",
+"date":"MW82OO",
+"description":"687634502IQ"}],
+"instances":[{ "jsonmodel_type":"instance",
+"is_representative":false,
+"instance_type":"realia",
+"sub_container":{ "jsonmodel_type":"sub_container",
+"top_container":{ "ref":"/repositories/2/top_containers/185"},
+"type_2":"object",
+"indicator_2":"YJL308J",
+"type_3":"folder",
+"indicator_3":"LEWGB"}}],
+"deaccessions":[],
+"related_accessions":[],
+"classifications":[],
+"notes":[],
+"title":"Resource Title: <emph render='italic'>149</emph>",
+"id_0":"894I483W399",
+"level":"subseries",
+"language":"iba",
+"ead_id":"XO549J999",
+"finding_aid_date":"HIJH376",
+"finding_aid_series_statement":"W38485B38",
+"finding_aid_note":"QN710N707",
+"ead_location":"V33358S515"}' \
+  "http://localhost:8089/repositories/2/resources"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources 
+```[:POST] /repositories/:repo_id/resources ```
 
 __Description__
 
@@ -7699,82 +9598,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"resource",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[{ "jsonmodel_type":"extent",
-"portion":"whole",
-"number":"10",
-"extent_type":"gigabytes",
-"dimensions":"YMJBG"}],
-"dates":[{ "jsonmodel_type":"date",
-"date_type":"inclusive",
-"label":"creation",
-"begin":"1994-04-14",
-"end":"1994-04-14",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"N690384I500"},
-{ "jsonmodel_type":"date",
-"date_type":"single",
-"label":"creation",
-"begin":"2001-10-11",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"LM114QY"}],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"restrictions":false,
-"revision_statements":[{ "jsonmodel_type":"revision_statement",
-"date":"JDAN552",
-"description":"RVDT197"}],
-"instances":[{ "jsonmodel_type":"instance",
-"is_representative":false,
-"instance_type":"realia",
-"sub_container":{ "jsonmodel_type":"sub_container",
-"top_container":{ "ref":"/repositories/2/top_containers/187"},
-"type_2":"box",
-"indicator_2":"RAO372E",
-"type_3":"frame",
-"indicator_3":"229720451WE"}}],
-"deaccessions":[],
-"related_accessions":[],
-"classifications":[],
-"notes":[],
-"title":"Resource Title: <emph render='italic'>154</emph>",
-"id_0":"AV519613M",
-"level":"fonds",
-"language":"ger",
-"ead_id":"572FYC956",
-"finding_aid_date":"ECLAH",
-"finding_aid_series_statement":"700314O795V",
-"finding_aid_language":"683ICMG",
-"finding_aid_note":"C68485CK",
-"ead_location":"961FXWW"}' \
-  "http://localhost:8089//repositories/:repo_id/resources"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources"
+
+
+## Get a list of Resources for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources 
+```[:GET] /repositories/:repo_id/resources ```
 
 __Description__
 
@@ -7789,28 +9641,42 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:resource)]
+  	200 -- [(:resource)]
 
 
-```shell 
+
+
+## Get a Resource
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources"
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id 
+```[:GET] /repositories/:repo_id/resources/:id ```
 
 __Description__
 
@@ -7823,31 +9689,88 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:resource)
+  	200 -- (:resource)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"UW108BY"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1"
+
+
+## Update a Resource
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"resource",
+"external_ids":[],
+"subjects":[],
+"linked_events":[],
+"extents":[{ "jsonmodel_type":"extent",
+"portion":"part",
+"number":"35",
+"extent_type":"terabytes",
+"dimensions":"SGER537",
+"physical_details":"778130656IO"}],
+"dates":[{ "jsonmodel_type":"date",
+"date_type":"single",
+"label":"creation",
+"begin":"2007-08-31",
+"end":"2007-08-31",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"DVGVC"},
+{ "jsonmodel_type":"date",
+"date_type":"single",
+"label":"creation",
+"begin":"1973-08-15",
+"certainty":"inferred",
+"era":"ce",
+"calendar":"gregorian",
+"expression":"TRB50X"}],
+"external_documents":[],
+"rights_statements":[],
+"linked_agents":[],
+"restrictions":false,
+"revision_statements":[{ "jsonmodel_type":"revision_statement",
+"date":"MW82OO",
+"description":"687634502IQ"}],
+"instances":[{ "jsonmodel_type":"instance",
+"is_representative":false,
+"instance_type":"realia",
+"sub_container":{ "jsonmodel_type":"sub_container",
+"top_container":{ "ref":"/repositories/2/top_containers/185"},
+"type_2":"object",
+"indicator_2":"YJL308J",
+"type_3":"folder",
+"indicator_3":"LEWGB"}}],
+"deaccessions":[],
+"related_accessions":[],
+"classifications":[],
+"notes":[],
+"title":"Resource Title: <emph render='italic'>149</emph>",
+"id_0":"894I483W399",
+"level":"subseries",
+"language":"iba",
+"ead_id":"XO549J999",
+"finding_aid_date":"HIJH376",
+"finding_aid_series_statement":"W38485B38",
+"finding_aid_note":"QN710N707",
+"ead_location":"V33358S515"}' \
+  "http://localhost:8089/repositories/2/resources/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id 
+```[:POST] /repositories/:repo_id/resources/:id ```
 
 __Description__
 
@@ -7864,83 +9787,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"resource",
-"external_ids":[],
-"subjects":[],
-"linked_events":[],
-"extents":[{ "jsonmodel_type":"extent",
-"portion":"whole",
-"number":"10",
-"extent_type":"gigabytes",
-"dimensions":"YMJBG"}],
-"dates":[{ "jsonmodel_type":"date",
-"date_type":"inclusive",
-"label":"creation",
-"begin":"1994-04-14",
-"end":"1994-04-14",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"N690384I500"},
-{ "jsonmodel_type":"date",
-"date_type":"single",
-"label":"creation",
-"begin":"2001-10-11",
-"certainty":"inferred",
-"era":"ce",
-"calendar":"gregorian",
-"expression":"LM114QY"}],
-"external_documents":[],
-"rights_statements":[],
-"linked_agents":[],
-"restrictions":false,
-"revision_statements":[{ "jsonmodel_type":"revision_statement",
-"date":"JDAN552",
-"description":"RVDT197"}],
-"instances":[{ "jsonmodel_type":"instance",
-"is_representative":false,
-"instance_type":"realia",
-"sub_container":{ "jsonmodel_type":"sub_container",
-"top_container":{ "ref":"/repositories/2/top_containers/187"},
-"type_2":"box",
-"indicator_2":"RAO372E",
-"type_3":"frame",
-"indicator_3":"229720451WE"}}],
-"deaccessions":[],
-"related_accessions":[],
-"classifications":[],
-"notes":[],
-"title":"Resource Title: <emph render='italic'>154</emph>",
-"id_0":"AV519613M",
-"level":"fonds",
-"language":"ger",
-"ead_id":"572FYC956",
-"finding_aid_date":"ECLAH",
-"finding_aid_series_statement":"700314O795V",
-"finding_aid_language":"683ICMG",
-"finding_aid_note":"C68485CK",
-"ead_location":"961FXWW"}' \
-  "http://localhost:8089//repositories/:repo_id/resources/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1"
+
+
+## Delete a Resource
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/resources/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/resources/:id 
+```[:DELETE] /repositories/:repo_id/resources/:id ```
 
 __Description__
 
@@ -7955,22 +9823,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1"
+
+
+## Move existing Archival Objects to become children of a Resource
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/resources/1/accept_children?children=F530BKX&position=1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id/accept_children 
+```[:POST] /repositories/:repo_id/resources/:id/accept_children ```
 
 __Description__
 
@@ -7979,7 +9868,7 @@ Move existing Archival Objects to become children of a Resource
 __Parameters__
 
 
-	[String] children -- The children to move to the Resource
+	[String] children (Optional) -- The children to move to the Resource
 
 	Integer id -- The ID of the Resource to move children to
 
@@ -7989,34 +9878,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"WF886720M"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/accept_children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/accept_children"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/accept_children"
+
+
+## Batch create several Archival Objects as children of an existing Resource
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/resources/1/children"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id/children 
+```[:POST] /repositories/:repo_id/resources/:id/children ```
 
 __Description__
 
@@ -8033,29 +9921,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	409 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	409 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/children"
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/children"
+
+
+## Get a list of record types in the graph of a resource
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/models_in_graph"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/models_in_graph 
+```[:GET] /repositories/:repo_id/resources/:id/models_in_graph ```
 
 __Description__
 
@@ -8070,26 +9961,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- OK
+  	200 -- OK
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/models_in_graph"
+
+
+## Get the list of URIs of this published resource and all published archival objects contained within.Ordered by tree order (i.e. if you fully expanded the record tree and read from top to bottom)
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/ordered_records"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/ordered_records 
+```[:GET] /repositories/:repo_id/resources/:id/ordered_records ```
 
 __Description__
 
-Get the list of URIs of this resource and all archival objects contained within.Ordered by tree order (i.e. if you fully expanded the record tree and read from top to bottom)
+Get the list of URIs of this published resource and all published archival objects contained within.Ordered by tree order (i.e. if you fully expanded the record tree and read from top to bottom)
 
 __Parameters__
 
@@ -8100,22 +9997,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- JSONModel(:resource_ordered_records)
+  	200 -- JSONModel(:resource_ordered_records)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/ordered_records"
+
+
+## Publish a resource and all its sub-records and components
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/resources/1/publish"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id/publish 
+```[:POST] /repositories/:repo_id/resources/:id/publish ```
 
 __Description__
 
@@ -8130,23 +10033,39 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/publish"
+
+
+## Suppress this record
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/resources/1/suppressed?suppressed=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id/suppressed 
+```[:POST] /repositories/:repo_id/resources/:id/suppressed ```
 
 __Description__
 
@@ -8163,27 +10082,84 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
+  	200 -- {:status => "Suppressed", :id => (id of updated object), :suppressed_state => (true|false)}
 
 
-```shell 
+
+
+## Get Top Containers linked to a published resource and published archival ojbects contained within.
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/suppressed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/suppressed"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/top_containers?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/resources/:id/transfer 
+```[:GET] /repositories/:repo_id/resources/:id/top_containers ```
+
+__Description__
+
+Get Top Containers linked to a published resource and published archival ojbects contained within.
+
+__Parameters__
+
+
+	Integer id -- The ID of the record
+
+	Integer repo_id -- The Repository ID -- The Repository must exist
+
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
+
+__Returns__
+
+  	200 -- a list of linked top containers
+
+  	404 -- Not found
+
+
+
+
+## Transfer this record to a different repository
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/resources/1/transfer?target_repo=C960I777D"
+
+```
+
+__Endpoint__
+
+```[:POST] /repositories/:repo_id/resources/:id/transfer ```
 
 __Description__
 
@@ -8200,27 +10176,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- moved
+  	200 -- moved
 
 
-```shell 
+
+
+## Get a Resource tree
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"747UWG592"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/transfer"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/transfer"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/tree?limit_to=O519MIG"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/tree 
+```[:GET] /repositories/:repo_id/resources/:id/tree ```
 
 __Description__
 
@@ -8231,33 +10217,49 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	String limit_to -- An Archival Object URI or 'root'
+	String limit_to (Optional) -- An Archival Object URI or 'root'
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- OK
+  	200 -- OK
 
 
-```shell 
+
+
+## Fetch tree information for an Archival Object record within a tree
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"105ONF480"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree"
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/tree/node?node_uri=B14I938Y&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/tree/node 
+```[:GET] /repositories/:repo_id/resources/:id/tree/node ```
 
 __Description__
 
@@ -8276,7 +10278,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
+  	200 -- Returns a JSON object describing enough information about a specific node.  Includes:
 
   * title -- the collection title
 
@@ -8296,29 +10298,40 @@ __Returns__
     the information in this structure can save a backend call.
 
 
-```shell 
+
+
+## Fetch tree paths from the root record to Archival Objects
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"112YKIA"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/tree/node_from_root?node_ids=1&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/tree/node_from_root 
+```[:GET] /repositories/:repo_id/resources/:id/tree/node_from_root ```
 
 __Description__
 
@@ -8337,7 +10350,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
+  	200 -- Returns a JSON array describing the path to a node, starting from the root of the tree.  Each path element provides:
 
   * node -- the URI of the node to next expand
 
@@ -8345,29 +10358,34 @@ __Returns__
     the path (or the desired record, if we're at the end of the path)
 
 
-```shell 
+
+
+## Fetch tree information for the top-level resource record
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node_from_root"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/node_from_root"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/tree/root?published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/tree/root 
+```[:GET] /repositories/:repo_id/resources/:id/tree/root ```
 
 __Description__
 
@@ -8384,7 +10402,7 @@ __Parameters__
 
 __Returns__
 
-	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
+  	200 -- Returns a JSON object describing enough information about this tree's root record to render the rest.  Includes:
 
   * title -- the collection title
 
@@ -8397,24 +10415,46 @@ __Returns__
   * waypoint_size -- the number of children in each waypoint
 
 
-```shell 
+
+
+## Fetch the record slice for a given tree waypoint
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/root"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/root"
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/1/tree/waypoint?offset=1&parent_node=U85MKJ&published_only=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/:id/tree/waypoint 
+```[:GET] /repositories/:repo_id/resources/:id/tree/waypoint ```
 
 __Description__
 
@@ -8429,13 +10469,13 @@ __Parameters__
 
 	Integer offset -- The page of records to return
 
-	String parent_node -- The URI of the parent of this waypoint (none for the root record)
+	String parent_node (Optional) -- The URI of the parent of this waypoint (none for the root record)
 
 	RESTHelpers::BooleanParam published_only -- Whether to restrict to published/unsuppressed items
 
 __Returns__
 
-	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
+  	200 -- Returns a JSON array containing information for the records contained in a given waypoint.  Each array element is an object that includes:
 
   * title -- the record's title
 
@@ -8446,34 +10486,34 @@ __Returns__
   * parent_id -- the internal ID of this document's parent
 
 
-```shell 
+
+
+## Get metadata for a MARC21 export
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"B906U983S"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/waypoint"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/resources/1/tree/waypoint"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/marc21/1.:fmt/metadata?include_unpublished_marc=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/marc21/:id.:fmt/metadata 
+```[:GET] /repositories/:repo_id/resources/marc21/:id.:fmt/metadata ```
 
 __Description__
 
@@ -8486,24 +10526,41 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
+	RESTHelpers::BooleanParam include_unpublished_marc (Optional) -- Include unpublished notes
+
 __Returns__
 
-	200 -- The export metadata
+  	200 -- The export metadata
 
 
-```shell 
+
+
+## Get a MARC 21 representation of a Resource
+
+
+
+  
+  
     
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/marc21/1.:fmt/metadata"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/resources/marc21/1.xml?include_unpublished_marc=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/resources/marc21/:id.xml 
+```[:GET] /repositories/:repo_id/resources/marc21/:id.xml ```
 
 __Description__
 
@@ -8516,24 +10573,86 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
+	RESTHelpers::BooleanParam include_unpublished_marc (Optional) -- Include unpublished notes
+
 __Returns__
 
-	200 -- (:resource)
+  	200 -- (:resource)
 
 
-```shell 
+
+
+## Search this repository
+
+
+
+
+  
+
+```shell
+  
     
     
-     
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"PRWOY"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"254EUNG"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"748Q927P224"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"426UAY615"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/resources/marc21/1.xml"
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"691LD662T"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"BooleanParam"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"LIDUG"' \
+  "http://localhost:8089/repositories/2/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"ENCN500"' \
+  "http://localhost:8089/repositories/2/search"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /repositories/:repo_id/search 
+```[:GET, :POST] /repositories/:repo_id/search ```
 
 __Description__
 
@@ -8548,105 +10667,68 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- 
+  	200 -- 
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"YGYIN"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"250GT429A"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"121O107411422"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"614X927YE"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"ODBGK"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"KT337TA"' \
-  "http://localhost:8089//repositories/:repo_id/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"H380R815R"' \
-  "http://localhost:8089//repositories/:repo_id/search"
+
+
+## Create a top container
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"top_container",
+"active_restrictions":[],
+"container_locations":[],
+"series":[],
+"collection":[],
+"indicator":"W128EVJ",
+"type":"box",
+"barcode":"24a4216e745acf51073491abe2d913bb",
+"ils_holding_id":"V473689EM",
+"ils_item_id":"V4195154265",
+"exported_to_ils":"2019-01-14T06:59:58-08:00"}' \
+  "http://localhost:8089/repositories/2/top_containers"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers 
+```[:POST] /repositories/:repo_id/top_containers ```
 
 __Description__
 
@@ -8661,36 +10743,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"top_container",
-"active_restrictions":[],
-"container_locations":[],
-"series":[],
-"collection":[],
-"indicator":"DB195PO",
-"type":"box",
-"barcode":"08bc84448b26f0e05fbc420eb244bf67",
-"ils_holding_id":"M164793967T",
-"ils_item_id":"UGWG718",
-"exported_to_ils":"2018-02-05T09:41:06-05:00"}' \
-  "http://localhost:8089//repositories/:repo_id/top_containers"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers"
+
+
+## Get a list of TopContainers for a Repository
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/top_containers?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/top_containers?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/top_containers?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/top_containers 
+```[:GET] /repositories/:repo_id/top_containers ```
 
 __Description__
 
@@ -8705,28 +10784,46 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
 __Returns__
 
-	200 -- [(:top_container)]
+  	200 -- [(:top_container)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers"
+
+
+## Update a top container
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"top_container",
+"active_restrictions":[],
+"container_locations":[],
+"series":[],
+"collection":[],
+"indicator":"W128EVJ",
+"type":"box",
+"barcode":"24a4216e745acf51073491abe2d913bb",
+"ils_holding_id":"V473689EM",
+"ils_item_id":"V4195154265",
+"exported_to_ils":"2019-01-14T06:59:58-08:00"}' \
+  "http://localhost:8089/repositories/2/top_containers/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/:id 
+```[:POST] /repositories/:repo_id/top_containers/:id ```
 
 __Description__
 
@@ -8743,37 +10840,35 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Get a top container by ID
+
+
+
+  
+  
     
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"top_container",
-"active_restrictions":[],
-"container_locations":[],
-"series":[],
-"collection":[],
-"indicator":"DB195PO",
-"type":"box",
-"barcode":"08bc84448b26f0e05fbc420eb244bf67",
-"ils_holding_id":"M164793967T",
-"ils_item_id":"UGWG718",
-"exported_to_ils":"2018-02-05T09:41:06-05:00"}' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/1"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/top_containers/1?resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/top_containers/:id 
+```[:GET] /repositories/:repo_id/top_containers/:id ```
 
 __Description__
 
@@ -8786,31 +10881,30 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- (:top_container)
+  	200 -- (:top_container)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BUA155N"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/1"
+
+
+## Delete a top container
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/repositories/2/top_containers/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /repositories/:repo_id/top_containers/:id 
+```[:DELETE] /repositories/:repo_id/top_containers/:id ```
 
 __Description__
 
@@ -8825,22 +10919,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/1"
+
+
+## Update container profile for a batch of top containers
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/top_containers/batch/container_profile?ids=1&container_profile_uri=731DE775W"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/batch/container_profile 
+```[:POST] /repositories/:repo_id/top_containers/batch/container_profile ```
 
 __Description__
 
@@ -8857,31 +10972,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/container_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"16IXN388"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/container_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/container_profile"
+
+
+## Update ils_holding_id for a batch of top containers
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/top_containers/batch/ils_holding_id?ids=1&ils_holding_id=156346BQG"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/batch/ils_holding_id 
+```[:POST] /repositories/:repo_id/top_containers/batch/ils_holding_id ```
 
 __Description__
 
@@ -8898,31 +11025,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/ils_holding_id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"MB619RU"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/ils_holding_id"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/ils_holding_id"
+
+
+## Update location for a batch of top containers
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/top_containers/batch/location?ids=1&location_uri=HP59891V"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/batch/location 
+```[:POST] /repositories/:repo_id/top_containers/batch/location ```
 
 __Description__
 
@@ -8939,31 +11078,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/location"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"932DVAH"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/location"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/batch/location"
+
+
+## Bulk update barcodes
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"YQ673420874"' \
+  "http://localhost:8089/repositories/2/top_containers/bulk/barcodes"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/bulk/barcodes 
+```[:POST] /repositories/:repo_id/top_containers/bulk/barcodes ```
 
 __Description__
 
@@ -8978,26 +11115,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"I981539FV"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/bulk/barcodes"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/bulk/barcodes"
+
+
+## Bulk update locations
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"HLJFJ"' \
+  "http://localhost:8089/repositories/2/top_containers/bulk/locations"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/top_containers/bulk/locations 
+```[:POST] /repositories/:repo_id/top_containers/bulk/locations ```
 
 __Description__
 
@@ -9012,26 +11152,97 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
+
+
+## Search for top containers
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"AB948G972"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/bulk/locations"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/bulk/locations"
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/top_containers/search?q=GTLUX&aq=["Example Missing"]&type=BTA253719&sort=V414285337S&facet=720776994YG&facet_mincount=1&filter=["Example Missing"]&exclude=CL680IQ&hl=true&root_record=P983UPQ&dt=YJNR981"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/top_containers/search 
+```[:GET] /repositories/:repo_id/top_containers/search ```
 
 __Description__
 
@@ -9042,100 +11253,61 @@ __Parameters__
 
 	Integer repo_id -- The Repository ID -- The Repository must exist
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- [(:top_container)]
+  	200 -- [(:top_container)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"KB127W414"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"P88450J631"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"QCKE24"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"83SBTM"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"YEF544D"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"N74157493W"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"731PR399H"' \
-  "http://localhost:8089//repositories/:repo_id/top_containers/search"
+
+
+## Transfer this record to a different repository
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/repositories/2/transfer?target_repo=232183228109J"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/:repo_id/transfer 
+```[:POST] /repositories/:repo_id/transfer ```
 
 __Description__
 
@@ -9150,26 +11322,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- moved
+  	200 -- moved
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"ADC872Q"' \
-  "http://localhost:8089//repositories/:repo_id/transfer"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/transfer"
+
+
+## Get a user's details including their groups for the current repository
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/2/users/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/:repo_id/users/:id 
+```[:GET] /repositories/:repo_id/users/:id ```
 
 __Description__
 
@@ -9184,22 +11358,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:user)
+  	200 -- (:user)
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//repositories/:repo_id/users/1"
+
+
+## Create a Repository with an agent representation
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/with_agent"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/with_agent 
+```[:POST] /repositories/with_agent ```
 
 __Description__
 
@@ -9212,23 +11393,32 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
-	403 -- access_denied
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
+
+  	403 -- access_denied
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/with_agent"
+
+
+## Get a Repository by ID, including its agent representation
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/repositories/with_agent/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /repositories/with_agent/:id 
+```[:GET] /repositories/with_agent/:id ```
 
 __Description__
 
@@ -9241,18 +11431,31 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:repository_with_agent)
-	404 -- Not found
+  	200 -- (:repository_with_agent)
+
+  	404 -- Not found
 
 
-```shell 
-    
+
+
+## Update a repository with an agent representation
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/repositories/with_agent/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /repositories/with_agent/:id 
+```[:POST] /repositories/with_agent/:id ```
 
 __Description__
 
@@ -9267,22 +11470,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//repositories/with_agent/1"
+
+
+## Get all ArchivesSpace schemas
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/schemas"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /schemas 
+```[:GET] /schemas ```
 
 __Description__
 
@@ -9293,16 +11502,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- ArchivesSpace (schemas)
+  	200 -- ArchivesSpace (schemas)
 
 
-```shell 
+
+
+## Get an ArchivesSpace schema
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/schemas/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /schemas/:schema 
+```[:GET] /schemas/:schema ```
 
 __Description__
 
@@ -9315,22 +11536,83 @@ __Parameters__
 
 __Returns__
 
-	200 -- ArchivesSpace (:schema)
-	404 -- Schema not found
+  	200 -- ArchivesSpace (:schema)
+
+  	404 -- Schema not found
 
 
-```shell 
+
+
+## Search this archive
+
+
+
+
+  
+
+```shell
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"HRCFG"' \
-  "http://localhost:8089//schemas/:schema"
+  -d '"470V36140252"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"TLE581H"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"384417885ES"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"QULJX"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"1"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"BELD746"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"BooleanParam"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"EY998B551"' \
+  "http://localhost:8089/search"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"PJU424Y"' \
+  "http://localhost:8089/search"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /search 
+```[:GET, :POST] /search ```
 
 __Description__
 
@@ -9345,98 +11627,60 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- 
+  	200 -- 
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"F248884TL"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"IXBD471"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"649439826QB"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"585R891946E"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"SM137IR"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"FECF481"' \
-  "http://localhost:8089//search"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"937Q521X696"' \
-  "http://localhost:8089//search"
+
+
+## Search across Location Profiles
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/search/location_profile?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/search/location_profile?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/search/location_profile?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /search/location_profile 
+```[:GET] /search/location_profile ```
 
 __Description__
 
@@ -9451,98 +11695,64 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- 
+  	200 -- 
 
 
-```shell 
+
+
+## Find the tree view for a particular archival record
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"CF431JD"' \
-  "http://localhost:8089//search/location_profile"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"IYALH"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"979KT655959"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"I84543966F"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"U558141KJ"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"DC8825D"' \
-  "http://localhost:8089//search/location_profile"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"PTHYN"' \
-  "http://localhost:8089//search/location_profile"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/search/published_tree?node_uri=470421105ED"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /search/published_tree 
+```[:GET] /search/published_tree ```
 
 __Description__
 
@@ -9555,22 +11765,53 @@ __Parameters__
 
 __Returns__
 
-	200 -- OK
-	404 -- Not found
+  	200 -- OK
+
+  	404 -- Not found
 
 
-```shell 
+
+
+## Return the counts of record types of interest by repository
+
+
+
+  
+  
     
-     
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+    
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"X664262FE"' \
-  "http://localhost:8089//search/published_tree"
+  -d '"WGND817"' \
+  "http://localhost:8089/search/record_types_by_repository?record_types=WGND817&repo_uri=E54147JQ"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"E54147JQ"' \
+  "http://localhost:8089/search/record_types_by_repository?record_types=WGND817&repo_uri=E54147JQ"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /search/record_types_by_repository 
+```[:GET, :POST] /search/record_types_by_repository ```
 
 __Description__
 
@@ -9581,30 +11822,53 @@ __Parameters__
 
 	[String] record_types -- The list of record types to tally
 
-	String repo_uri -- An optional repository URI.  If given, just return counts for the single repository
+	String repo_uri (Optional) -- An optional repository URI.  If given, just return counts for the single repository
 
 __Returns__
 
-	200 -- If repository is given, returns a map like {'record_type' => <count>}.  Otherwise, {'repo_uri' => {'record_type' => <count>}}
+  	200 -- If repository is given, returns a map like {'record_type' => <count>}.  Otherwise, {'repo_uri' => {'record_type' => <count>}}
 
 
-```shell 
+
+
+## Return a set of records by URI
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"MT150U740"' \
-  "http://localhost:8089//search/record_types_by_repository"
+      
+        
+      
     
-     
+  
+    
+      
+    
+  
+  
+
+  
+
+```shell
+  
+    
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"445LG767Q"' \
-  "http://localhost:8089//search/record_types_by_repository"
+  -d '"S842YVK"' \
+  "http://localhost:8089/search/records?uri=S842YVK&resolve[]=[record_types, to_resolve]"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"AOG83W"' \
+  "http://localhost:8089/search/records?uri=S842YVK&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /search/records 
+```[:GET, :POST] /search/records ```
 
 __Description__
 
@@ -9615,30 +11879,85 @@ __Parameters__
 
 	[String] uri -- The list of record URIs to fetch
 
-	[String] resolve -- The list of result fields to resolve (if any)
+	[String] resolve (Optional) -- The list of result fields to resolve (if any)
 
 __Returns__
 
-	200 -- a JSON map of records
+  	200 -- a JSON map of records
 
 
-```shell 
+
+
+## Search across repositories
+
+
+
+
+  
+
+```shell
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BV958F684"' \
-  "http://localhost:8089//search/records"
+  -d '"VMU665744"' \
+  "http://localhost:8089/search/repositories"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"AB833260B"' \
-  "http://localhost:8089//search/records"
+  -d '["Example Missing"]' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"JJ961KS"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"FULFQ"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"381G787DL"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"1"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"S940YXP"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"BooleanParam"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"645GX455649"' \
+  "http://localhost:8089/search/repositories"
+  
+    
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '"J404959SW"' \
+  "http://localhost:8089/search/repositories"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /search/repositories 
+```[:GET, :POST] /search/repositories ```
 
 __Description__
 
@@ -9653,98 +11972,108 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- 
+  	200 -- 
 
 
-```shell 
+
+
+## Search across subjects
+
+
+
+
+  
+
+```shell
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BYFHP"' \
-  "http://localhost:8089//search/repositories"
+  -d '"281707W543R"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//search/repositories"
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"162LL413H"' \
-  "http://localhost:8089//search/repositories"
+  -d '"546304Q941W"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"R847KLO"' \
-  "http://localhost:8089//search/repositories"
+  -d '"3K984990A"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"96753S42Q"' \
-  "http://localhost:8089//search/repositories"
+  -d '"897301XB679"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '"1"' \
-  "http://localhost:8089//search/repositories"
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '["Example Missing"]' \
-  "http://localhost:8089//search/repositories"
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"MTL7284"' \
-  "http://localhost:8089//search/repositories"
+  -d '"JFFRI"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
   -d '"BooleanParam"' \
-  "http://localhost:8089//search/repositories"
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"N171311ER"' \
-  "http://localhost:8089//search/repositories"
+  -d '"493F235EJ"' \
+  "http://localhost:8089/search/subjects"
+  
     
-     
 curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"JI179888F"' \
-  "http://localhost:8089//search/repositories"
+  -d '"Y139SS17"' \
+  "http://localhost:8089/search/subjects"
   
 
 ```
 
+__Endpoint__
 
-## [:GET, :POST] /search/subjects 
+```[:GET, :POST] /search/subjects ```
 
 __Description__
 
@@ -9759,98 +12088,55 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
-	String q -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
+	String q (Optional) -- A search query string.  Uses Lucene 4.0 syntax: http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html  Search index structure can be found in solr/schema.xml
 
-	JSONModel(:advanced_query) aq -- A json string containing the advanced query
+	JSONModel(:advanced_query) aq (Optional) -- A json string containing the advanced query
 
-	[String] type -- The record type to search (defaults to all types if not specified)
+	[String] type (Optional) -- The record type to search (defaults to all types if not specified)
 
-	String sort -- The attribute to sort and the direction e.g. &sort=title desc&...
+	String sort (Optional) -- The attribute to sort and the direction e.g. &sort=title desc&...
 
-	[String] facet -- The list of the fields to produce facets for
+	[String] facet (Optional) -- The list of the fields to produce facets for
 
-	Integer facet_mincount -- The minimum count for a facet field to be included in the response
+	Integer facet_mincount (Optional) -- The minimum count for a facet field to be included in the response
 
-	JSONModel(:advanced_query) filter -- A json string containing the advanced query to filter by
+	JSONModel(:advanced_query) filter (Optional) -- A json string containing the advanced query to filter by
 
-	[String] exclude -- A list of document IDs that should be excluded from results
+	[String] exclude (Optional) -- A list of document IDs that should be excluded from results
 
-	RESTHelpers::BooleanParam hl -- Whether to use highlighting
+	RESTHelpers::BooleanParam hl (Optional) -- Whether to use highlighting
 
-	String root_record -- Search within a collection of records (defined by the record at the root of the tree)
+	String root_record (Optional) -- Search within a collection of records (defined by the record at the root of the tree)
 
-	String dt -- Format to return (JSON default)
+	String dt (Optional) -- Format to return (JSON default)
 
 __Returns__
 
-	200 -- 
+  	200 -- 
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"723G834800N"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"247YP122V"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"IP839147J"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"739LA900K"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"190QF637N"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"J201MM823"' \
-  "http://localhost:8089//search/subjects"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"880714EHM"' \
-  "http://localhost:8089//search/subjects"
+
+
+## Get a Location by ID
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/space_calculator/buildings"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /space_calculator/buildings 
+```[:GET] /space_calculator/buildings ```
 
 __Description__
 
@@ -9861,16 +12147,61 @@ __Parameters__
 
 __Returns__
 
-	200 -- Location building data as JSON
+  	200 -- Location building data as JSON
 
 
-```shell 
+
+
+## Calculate how many containers will fit in locations for a given building
+
+
+
+  
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/space_calculator/by_building?container_profile_uri=C906247D822&building=ODQ46834&floor=18TMLL&room=E564763856A&area=G11364CS"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /space_calculator/by_building 
+```[:GET] /space_calculator/by_building ```
 
 __Description__
 
@@ -9883,49 +12214,51 @@ __Parameters__
 
 	String building -- The building to check for space in
 
-	String floor -- The floor to check for space in
+	String floor (Optional) -- The floor to check for space in
 
-	String room -- The room to check for space in
+	String room (Optional) -- The room to check for space in
 
-	String area -- The area to check for space in
+	String area (Optional) -- The area to check for space in
 
 __Returns__
 
-	200 -- Calculation results
+  	200 -- Calculation results
 
 
-```shell 
+
+
+## Calculate how many containers will fit in a list of locations
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"859V928PX"' \
-  "http://localhost:8089//space_calculator/by_building"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"NPY539U"' \
-  "http://localhost:8089//space_calculator/by_building"
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"KDDH570"' \
-  "http://localhost:8089//space_calculator/by_building"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"NYSS724"' \
-  "http://localhost:8089//space_calculator/by_building"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"T12621JG"' \
-  "http://localhost:8089//space_calculator/by_building"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/space_calculator/by_location?container_profile_uri=461160846N997&location_uris=OA95120J"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /space_calculator/by_location 
+```[:GET] /space_calculator/by_location ```
 
 __Description__
 
@@ -9940,26 +12273,42 @@ __Parameters__
 
 __Returns__
 
-	200 -- Calculation results
+  	200 -- Calculation results
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"NTCE934"' \
-  "http://localhost:8089//space_calculator/by_location"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"4KETM"' \
-  "http://localhost:8089//space_calculator/by_location"
+
+
+## Create a Subject
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"subject",
+"external_ids":[],
+"publish":true,
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"terms":[{ "jsonmodel_type":"term",
+"term":"Term 132",
+"term_type":"temporal",
+"vocabulary":"/vocabularies/156"}],
+"external_documents":[],
+"vocabulary":"/vocabularies/157",
+"authority_id":"http://www.example-572.com",
+"scope_note":"EFYWK",
+"source":"aat"}' \
+  "http://localhost:8089/subjects"
 
 ```
 
+__Endpoint__
 
-## [:POST] /subjects 
+```[:POST] /subjects ```
 
 __Description__
 
@@ -9972,34 +12321,33 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"subject",
-"external_ids":[],
-"publish":true,
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"terms":[{ "jsonmodel_type":"term",
-"term":"Term 132",
-"term_type":"cultural_context",
-"vocabulary":"/vocabularies/156"}],
-"external_documents":[],
-"vocabulary":"/vocabularies/157",
-"authority_id":"http://www.example-596.com",
-"scope_note":"323IMAN",
-"source":"aat"}' \
-  "http://localhost:8089//subjects"
+
+
+## Get a list of Subjects
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/subjects?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/subjects?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/subjects?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /subjects 
+```[:GET] /subjects ```
 
 __Description__
 
@@ -10014,21 +12362,47 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:subject)]
+  	200 -- [(:subject)]
 
 
-```shell 
+
+
+## Update a Subject
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"subject",
+"external_ids":[],
+"publish":true,
+"used_within_repositories":[],
+"used_within_published_repositories":[],
+"terms":[{ "jsonmodel_type":"term",
+"term":"Term 132",
+"term_type":"temporal",
+"vocabulary":"/vocabularies/156"}],
+"external_documents":[],
+"vocabulary":"/vocabularies/157",
+"authority_id":"http://www.example-572.com",
+"scope_note":"EFYWK",
+"source":"aat"}' \
+  "http://localhost:8089/subjects/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /subjects/:id 
+```[:POST] /subjects/:id ```
 
 __Description__
 
@@ -10043,35 +12417,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"subject",
-"external_ids":[],
-"publish":true,
-"used_within_repositories":[],
-"used_within_published_repositories":[],
-"terms":[{ "jsonmodel_type":"term",
-"term":"Term 132",
-"term_type":"cultural_context",
-"vocabulary":"/vocabularies/156"}],
-"external_documents":[],
-"vocabulary":"/vocabularies/157",
-"authority_id":"http://www.example-596.com",
-"scope_note":"323IMAN",
-"source":"aat"}' \
-  "http://localhost:8089//subjects/1"
+
+
+## Get a Subject by ID
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/subjects/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /subjects/:id 
+```[:GET] /subjects/:id ```
 
 __Description__
 
@@ -10084,17 +12451,26 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:subject)
+  	200 -- (:subject)
 
 
-```shell 
-    
+
+
+## Delete a Subject
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/subjects/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /subjects/:id 
+```[:DELETE] /subjects/:id ```
 
 __Description__
 
@@ -10107,17 +12483,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Get a list of Terms matching a prefix
+
+
+
+  
+  
     
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/terms?q=JSPFL"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /terms 
+```[:GET] /terms ```
 
 __Description__
 
@@ -10130,21 +12526,41 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:term)]
+  	200 -- [(:term)]
 
 
-```shell 
+
+
+## Get a stream of updated records
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"610QDXM"' \
-  "http://localhost:8089//terms"
+      
+        
+      
+    
+  
+    
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/update-feed?last_sequence=1&resolve[]=[record_types, to_resolve]"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /update-feed 
+```[:GET] /update-feed ```
 
 __Description__
 
@@ -10153,32 +12569,35 @@ Get a stream of updated records
 __Parameters__
 
 
-	Integer last_sequence -- The last sequence number seen
+	Integer last_sequence (Optional) -- The last sequence number seen
 
-	[String] resolve -- A list of references to resolve and embed in the response
+	[String] resolve (Optional) -- A list of references to resolve and embed in the response
 
 __Returns__
 
-	200 -- a list of records and sequence numbers
+  	200 -- a list of records and sequence numbers
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//update-feed"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"OCE666X"' \
-  "http://localhost:8089//update-feed"
+
+
+## Refresh the list of currently known edits
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/update_monitor"
 
 ```
 
+__Endpoint__
 
-## [:POST] /update_monitor 
+```[:POST] /update_monitor ```
 
 __Description__
 
@@ -10191,21 +12610,48 @@ __Parameters__
 
 __Returns__
 
-	200 -- A list of records, the user editing it and the lock version for each
+  	200 -- A list of records, the user editing it and the lock version for each
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//update_monitor"
+
+
+## Create a local user
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"user",
+"groups":[],
+"is_admin":false,
+"username":"username_21",
+"name":"Name Number 608"}' \
+  "http://localhost:8089/users?password=XR132524686&groups=S28IT167"
 
 ```
 
+__Endpoint__
 
-## [:POST] /users 
+```[:POST] /users ```
 
 __Description__
 
@@ -10216,42 +12662,41 @@ __Parameters__
 
 	String password -- The user's password
 
-	[String] groups -- Array of groups URIs to assign the user to
+	[String] groups (Optional) -- Array of groups URIs to assign the user to
 
 	JSONModel(:user) <request body> -- The record to create
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"349H850C486"' \
-  "http://localhost:8089//users"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"10P751CC"' \
-  "http://localhost:8089//users"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"user",
-"groups":[],
-"is_admin":false,
-"username":"username_21",
-"name":"Name Number 633"}' \
-  "http://localhost:8089//users"
+
+
+## Get a list of users
+
+
+
+
+  
+
+```shell
+  
+# return first 10 records
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users?page=1&page_size=10"
+# return first 5 records in the Fibonacci sequence
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users?id_set=1,2,3,5,8"
+# return an array of all the ids
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users?all_ids=true"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /users 
+```[:GET] /users ```
 
 __Description__
 
@@ -10266,21 +12711,33 @@ This endpoint is paginated. :page, :id_set, or :all_ids is required
   <li>Integer page_size &ndash; The size of the set to be returned ( Optional. default set in AppConfig )</li>
   <li>Comma seperated list id_set &ndash; A list of ids to request resolved objects ( Must be smaller than default page_size )</li>
   <li>Boolean all_ids &ndash; Return a list of all object ids</li>
-</ul>  
+</ul>
 </aside>
 
 __Returns__
 
-	200 -- [(:resource)]
+  	200 -- [(:resource)]
 
 
-```shell 
+
+
+## Get a user's details (including their current permissions)
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /users/:id 
+```[:GET] /users/:id ```
 
 __Description__
 
@@ -10293,17 +12750,42 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:user)
+  	200 -- (:user)
 
 
-```shell 
+
+
+## Update a user's account
+
+
+
+  
+  
+    
+      
+        
+      
     
   
+  
+
+  
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '{ "jsonmodel_type":"user",
+"groups":[],
+"is_admin":false,
+"username":"username_21",
+"name":"Name Number 608"}' \
+  "http://localhost:8089/users/1?password=665176829757A"
 
 ```
 
+__Endpoint__
 
-## [:POST] /users/:id 
+```[:POST] /users/:id ```
 
 __Description__
 
@@ -10314,38 +12796,34 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	String password -- The user's password
+	String password (Optional) -- The user's password
 
 	JSONModel(:user) <request body> -- The updated record
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"NOPAO"' \
-  "http://localhost:8089//users/1"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '{ "jsonmodel_type":"user",
-"groups":[],
-"is_admin":false,
-"username":"username_21",
-"name":"Name Number 633"}' \
-  "http://localhost:8089//users/1"
+
+
+## Delete a user
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" -X DELETE "http://localhost:8089/users/1"
 
 ```
 
+__Endpoint__
 
-## [:DELETE] /users/:id 
+```[:DELETE] /users/:id ```
 
 __Description__
 
@@ -10358,17 +12836,43 @@ __Parameters__
 
 __Returns__
 
-	200 -- deleted
+  	200 -- deleted
 
 
-```shell 
+
+
+## Update a user's groups
+
+
+
+  
+  
+    
+      
+        
+      
     
   
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/users/1/groups?groups=N958430AO&remove_groups=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /users/:id/groups 
+```[:POST] /users/:id/groups ```
 
 __Description__
 
@@ -10379,7 +12883,7 @@ __Parameters__
 
 	Integer id -- The ID of the record
 
-	[String] groups -- Array of groups URIs to assign the user to
+	[String] groups (Optional) -- Array of groups URIs to assign the user to
 
 	RESTHelpers::BooleanParam remove_groups -- Remove all groups from the user for the current repo_id if true
 
@@ -10387,33 +12891,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
-	400 -- {:error => (description of error)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
+
+  	400 -- {:error => (description of error)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"839C792XD"' \
-  "http://localhost:8089//users/1/groups"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//users/1/groups"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"1"' \
-  "http://localhost:8089//users/1/groups"
+
+
+## Become a different user
+
+
+
+
   
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/users/1/become-user"
 
 ```
 
+__Endpoint__
 
-## [:POST] /users/:username/become-user 
+```[:POST] /users/:username/become-user ```
 
 __Description__
 
@@ -10426,22 +12927,45 @@ __Parameters__
 
 __Returns__
 
-	200 -- Accepted
-	404 -- User not found
+  	200 -- Accepted
+
+  	404 -- User not found
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"username_22"' \
-  "http://localhost:8089//users/:username/become-user"
+
+
+## Log in
+
+
+
   
+  
+    
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d 'Example Missing' \
+  "http://localhost:8089/users/1/login?password=256QEU327&expiring=true"
 
 ```
 
+__Endpoint__
 
-## [:POST] /users/:username/login 
+```[:POST] /users/:username/login ```
 
 __Description__
 
@@ -10460,32 +12984,39 @@ NOTE: Previously this parameter would cause the created session to last forever,
 
 __Returns__
 
-	200 -- Login accepted
-	403 -- Login failed
+  	200 -- Login accepted
+
+  	403 -- Login failed
 
 
-```shell 
+
+
+## Get a list of system users
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"username_23"' \
-  "http://localhost:8089//users/:username/login"
+      
+        
+      
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"686Y56SD"' \
-  "http://localhost:8089//users/:username/login"
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BooleanParam"' \
-  "http://localhost:8089//users/:username/login"
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users/complete?query=YN881MP"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /users/complete 
+```[:GET] /users/complete ```
 
 __Description__
 
@@ -10498,21 +13029,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- A list of usernames
+  	200 -- A list of usernames
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"952335WPD"' \
-  "http://localhost:8089//users/complete"
+
+
+## Get the currently logged in user
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/users/current-user"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /users/current-user 
+```[:GET] /users/current-user ```
 
 __Description__
 
@@ -10523,17 +13061,30 @@ __Parameters__
 
 __Returns__
 
-	200 -- (:user)
-	404 -- Not logged in
+  	200 -- (:user)
+
+  	404 -- Not logged in
 
 
-```shell 
+
+
+## Get the ArchivesSpace application version
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/version"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /version 
+```[:GET] /version ```
 
 __Description__
 
@@ -10544,16 +13095,29 @@ __Parameters__
 
 __Returns__
 
-	200 -- ArchivesSpace (version)
+  	200 -- ArchivesSpace (version)
 
 
-```shell 
+
+
+## Create a Vocabulary
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/vocabularies"
 
 ```
 
+__Endpoint__
 
-## [:POST] /vocabularies 
+```[:POST] /vocabularies ```
 
 __Description__
 
@@ -10566,21 +13130,37 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
+  	200 -- {:status => "Created", :id => (id of created object), :warnings => {(warnings)}}
 
 
-```shell 
+
+
+## Get a list of Vocabularies
+
+
+
+  
+  
     
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//vocabularies"
+      
+        
+      
+    
+  
+  
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/vocabularies?ref_id=888Y224UN"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /vocabularies 
+```[:GET] /vocabularies ```
 
 __Description__
 
@@ -10589,25 +13169,33 @@ Get a list of Vocabularies
 __Parameters__
 
 
-	String ref_id -- An alternate, externally-created ID for the vocabulary
+	String ref_id (Optional) -- An alternate, externally-created ID for the vocabulary
 
 __Returns__
 
-	200 -- [(:vocabulary)]
+  	200 -- [(:vocabulary)]
 
 
-```shell 
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '"BHD502S"' \
-  "http://localhost:8089//vocabularies"
+
+
+## Update a Vocabulary
+
+
+
+
   
+  
+
+```shell
+curl -H "X-ArchivesSpace-Session: $SESSION" \
+  -d '["Example Missing"]' \
+  "http://localhost:8089/vocabularies/1"
 
 ```
 
+__Endpoint__
 
-## [:POST] /vocabularies/:id 
+```[:POST] /vocabularies/:id ```
 
 __Description__
 
@@ -10622,22 +13210,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- {:status => "Updated", :id => (id of updated object)}
+  	200 -- {:status => "Updated", :id => (id of updated object)}
 
 
-```shell 
-    
-    
-     
-curl -H "X-ArchivesSpace-Session: $SESSION" \
-  -d '["Example Missing"]' \
-  "http://localhost:8089//vocabularies/1"
+
+
+## Get a Vocabulary by ID
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/vocabularies/1"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /vocabularies/:id 
+```[:GET] /vocabularies/:id ```
 
 __Description__
 
@@ -10650,17 +13244,28 @@ __Parameters__
 
 __Returns__
 
-	200 -- OK
+  	200 -- OK
 
 
-```shell 
-    
+
+
+## Get a list of Terms for a Vocabulary
+
+
+
+
+  
+
+```shell
+  
+curl -H "X-ArchivesSpace-Session: $SESSION" "http://localhost:8089/vocabularies/1/terms"
   
 
 ```
 
+__Endpoint__
 
-## [:GET] /vocabularies/:id/terms 
+```[:GET] /vocabularies/:id/terms ```
 
 __Description__
 
@@ -10673,14 +13278,1685 @@ __Parameters__
 
 __Returns__
 
-	200 -- [(:term)]
+  	200 -- [(:term)]
 
 
-```shell 
+
+
+# Routes by URI
+
+<p>An index of routes available in the ArchivesSpace API, alphabetically by URI.</p>
+
+<table>
+  <thead>></thead>
+  <thead>
+    <tr>
+      <th>Route</th> <th>Method(s)</th> <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
     
-  
-
-```
-
-
-
+      <tr>
+        <td><a href="#create-a-corporate-entity-agent">/agents/corporate_entities</a></td>
+        <td>POST</td>
+        <td>Create a corporate entity agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-corporate-entity-agents">/agents/corporate_entities</a></td>
+        <td>GET</td>
+        <td>List all corporate entity agents</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-corporate-entity-agent">/agents/corporate_entities/:id</a></td>
+        <td>POST</td>
+        <td>Update a corporate entity agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-corporate-entity-by-id">/agents/corporate_entities/:id</a></td>
+        <td>GET</td>
+        <td>Get a corporate entity by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-corporate-entity-agent">/agents/corporate_entities/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a corporate entity agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-family-agent">/agents/families</a></td>
+        <td>POST</td>
+        <td>Create a family agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-family-agents">/agents/families</a></td>
+        <td>GET</td>
+        <td>List all family agents</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-family-agent">/agents/families/:id</a></td>
+        <td>POST</td>
+        <td>Update a family agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-family-by-id">/agents/families/:id</a></td>
+        <td>GET</td>
+        <td>Get a family by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-agent-family">/agents/families/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an agent family</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-person-agent">/agents/people</a></td>
+        <td>POST</td>
+        <td>Create a person agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-person-agents">/agents/people</a></td>
+        <td>GET</td>
+        <td>List all person agents</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-person-agent">/agents/people/:id</a></td>
+        <td>POST</td>
+        <td>Update a person agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-person-by-id">/agents/people/:id</a></td>
+        <td>GET</td>
+        <td>Get a person by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-agent-person">/agents/people/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an agent person</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-software-agent">/agents/software</a></td>
+        <td>POST</td>
+        <td>Create a software agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-software-agents">/agents/software</a></td>
+        <td>GET</td>
+        <td>List all software agents</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-software-agent">/agents/software/:id</a></td>
+        <td>POST</td>
+        <td>Update a software agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-software-agent-by-id">/agents/software/:id</a></td>
+        <td>GET</td>
+        <td>Get a software agent by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-software-agent">/agents/software/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a software agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-delete-requests-against-a-list-of-records">/batch_delete</a></td>
+        <td>POST</td>
+        <td>Carry out delete requests against a list of records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-records-by-their-external-id-s">/by-external-id</a></td>
+        <td>GET</td>
+        <td>List records by their external ID(s)</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-enumeration-value">/config/enumeration_values/:enum_val_id</a></td>
+        <td>GET</td>
+        <td>Get an Enumeration Value</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-enumeration-value">/config/enumeration_values/:enum_val_id</a></td>
+        <td>POST</td>
+        <td>Update an enumeration value</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-the-position-of-an-ennumeration-value">/config/enumeration_values/:enum_val_id/position</a></td>
+        <td>POST</td>
+        <td>Update the position of an ennumeration value</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-value">/config/enumeration_values/:enum_val_id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this value</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-defined-enumerations">/config/enumerations</a></td>
+        <td>GET</td>
+        <td>List all defined enumerations</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-enumeration">/config/enumerations</a></td>
+        <td>POST</td>
+        <td>Create an enumeration</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-enumeration">/config/enumerations/:enum_id</a></td>
+        <td>POST</td>
+        <td>Update an enumeration</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-enumeration">/config/enumerations/:enum_id</a></td>
+        <td>GET</td>
+        <td>Get an Enumeration</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#migrate-all-records-from-using-one-value-to-another">/config/enumerations/migration</a></td>
+        <td>POST</td>
+        <td>Migrate all records from using one value to another</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-enumeration-by-name">/config/enumerations/names/:enum_name</a></td>
+        <td>GET</td>
+        <td>Get an Enumeration by Name</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-container-profile">/container_profiles</a></td>
+        <td>POST</td>
+        <td>Create a Container_Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-container-profiles">/container_profiles</a></td>
+        <td>GET</td>
+        <td>Get a list of Container Profiles</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-container-profile">/container_profiles/:id</a></td>
+        <td>POST</td>
+        <td>Update a Container Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-container-profile-by-id">/container_profiles/:id</a></td>
+        <td>GET</td>
+        <td>Get a Container Profile by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-container-profile">/container_profiles/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an Container Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-global-preferences-records-for-the-current-user">/current_global_preferences</a></td>
+        <td>GET</td>
+        <td>Get the global Preferences records for the current user.</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#calculate-the-dates-of-an-archival-object-tree">/date_calculator</a></td>
+        <td>GET</td>
+        <td>Calculate the dates of an archival object tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-stream-of-deleted-records">/delete-feed</a></td>
+        <td>GET</td>
+        <td>Get a stream of deleted records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#calculate-the-extent-of-an-archival-object-tree">/extent_calculator</a></td>
+        <td>GET</td>
+        <td>Calculate the extent of an archival object tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-supported-job-types">/job_types</a></td>
+        <td>GET</td>
+        <td>List all supported job types</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-location-profile">/location_profiles</a></td>
+        <td>POST</td>
+        <td>Create a Location_Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-location-profiles">/location_profiles</a></td>
+        <td>GET</td>
+        <td>Get a list of Location Profiles</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-location-profile">/location_profiles/:id</a></td>
+        <td>POST</td>
+        <td>Update a Location Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-location-profile-by-id">/location_profiles/:id</a></td>
+        <td>GET</td>
+        <td>Get a Location Profile by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-location-profile">/location_profiles/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an Location Profile</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-location">/locations</a></td>
+        <td>POST</td>
+        <td>Create a Location</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-locations">/locations</a></td>
+        <td>GET</td>
+        <td>Get a list of locations</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-location">/locations/:id</a></td>
+        <td>POST</td>
+        <td>Update a Location</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-location-by-id">/locations/:id</a></td>
+        <td>GET</td>
+        <td>Get a Location by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-location">/locations/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Location</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-batch-of-locations">/locations/batch</a></td>
+        <td>POST</td>
+        <td>Create a Batch of Locations</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-location">/locations/batch_update</a></td>
+        <td>POST</td>
+        <td>Update a Location</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#log-out-the-current-session">/logout</a></td>
+        <td>POST</td>
+        <td>Log out the current session</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-a-merge-request-against-agent-records">/merge_requests/agent</a></td>
+        <td>POST</td>
+        <td>Carry out a merge request against Agent records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-a-detailed-merge-request-against-agent-records">/merge_requests/agent_detail</a></td>
+        <td>POST</td>
+        <td>Carry out a detailed merge request against Agent records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-a-merge-request-against-digital-object-records">/merge_requests/digital_object</a></td>
+        <td>POST</td>
+        <td>Carry out a merge request against Digital_Object records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-a-merge-request-against-resource-records">/merge_requests/resource</a></td>
+        <td>POST</td>
+        <td>Carry out a merge request against Resource records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#carry-out-a-merge-request-against-subject-records">/merge_requests/subject</a></td>
+        <td>POST</td>
+        <td>Carry out a merge request against Subject records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-stream-of-notifications">/notifications</a></td>
+        <td>GET</td>
+        <td>Get a stream of notifications</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-permissions">/permissions</a></td>
+        <td>GET</td>
+        <td>Get a list of Permissions</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-reports">/reports</a></td>
+        <td>GET</td>
+        <td>List all reports</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-static-asset-for-a-report">/reports/static/*</a></td>
+        <td>GET</td>
+        <td>Get a static asset for a report</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-repository">/repositories</a></td>
+        <td>POST</td>
+        <td>Create a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-repositories">/repositories</a></td>
+        <td>GET</td>
+        <td>Get a list of Repositories</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-repository">/repositories/:id</a></td>
+        <td>POST</td>
+        <td>Update a repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-repository-by-id">/repositories/:id</a></td>
+        <td>GET</td>
+        <td>Get a Repository by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-repository">/repositories/:repo_id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-accession">/repositories/:repo_id/accessions</a></td>
+        <td>POST</td>
+        <td>Create an Accession</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-accessions-for-a-repository">/repositories/:repo_id/accessions</a></td>
+        <td>GET</td>
+        <td>Get a list of Accessions for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-accession">/repositories/:repo_id/accessions/:id</a></td>
+        <td>POST</td>
+        <td>Update an Accession</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-accession-by-id">/repositories/:repo_id/accessions/:id</a></td>
+        <td>GET</td>
+        <td>Get an Accession by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-accession">/repositories/:repo_id/accessions/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an Accession</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record">/repositories/:repo_id/accessions/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-top-containers-linked-to-an-accession">/repositories/:repo_id/accessions/:id/top_containers</a></td>
+        <td>GET</td>
+        <td>Get Top Containers linked to an Accession</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#transfer-this-record-to-a-different-repository">/repositories/:repo_id/accessions/:id/transfer</a></td>
+        <td>POST</td>
+        <td>Transfer this record to a different repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-an-eac-cpf-export-of-a-corporate-entity">/repositories/:repo_id/archival_contexts/corporate_entities/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for an EAC-CPF export of a corporate entity</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-eac-cpf-representation-of-a-corporate-entity">/repositories/:repo_id/archival_contexts/corporate_entities/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get an EAC-CPF representation of a Corporate Entity</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-an-eac-cpf-export-of-a-family">/repositories/:repo_id/archival_contexts/families/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for an EAC-CPF export of a family</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-eac-cpf-representation-of-a-family">/repositories/:repo_id/archival_contexts/families/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get an EAC-CPF representation of a Family</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-an-eac-cpf-export-of-a-person">/repositories/:repo_id/archival_contexts/people/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for an EAC-CPF export of a person</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-eac-cpf-representation-of-an-agent">/repositories/:repo_id/archival_contexts/people/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get an EAC-CPF representation of an Agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-an-eac-cpf-export-of-a-software">/repositories/:repo_id/archival_contexts/softwares/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for an EAC-CPF export of a software</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-eac-cpf-representation-of-a-software-agent">/repositories/:repo_id/archival_contexts/softwares/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get an EAC-CPF representation of a Software agent</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-archival-object">/repositories/:repo_id/archival_objects</a></td>
+        <td>POST</td>
+        <td>Create an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-archival-objects-for-a-repository">/repositories/:repo_id/archival_objects</a></td>
+        <td>GET</td>
+        <td>Get a list of Archival Objects for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-archival-object">/repositories/:repo_id/archival_objects/:id</a></td>
+        <td>POST</td>
+        <td>Update an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-archival-object-by-id">/repositories/:repo_id/archival_objects/:id</a></td>
+        <td>GET</td>
+        <td>Get an Archival Object by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-archival-object">/repositories/:repo_id/archival_objects/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-archival-objects-to-become-children-of-an-archival-object">/repositories/:repo_id/archival_objects/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Archival Objects to become children of an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-children-of-an-archival-object">/repositories/:repo_id/archival_objects/:id/children</a></td>
+        <td>GET</td>
+        <td>Get the children of an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#batch-create-several-archival-objects-as-children-of-an-existing-archival-object">/repositories/:repo_id/archival_objects/:id/children</a></td>
+        <td>POST</td>
+        <td>Batch create several Archival Objects as children of an existing Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#set-the-parent-position-of-an-archival-object-in-a-tree">/repositories/:repo_id/archival_objects/:id/parent</a></td>
+        <td>POST</td>
+        <td>Set the parent/position of an Archival Object in a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-previous-record-in-the-tree-for-an-archival-object">/repositories/:repo_id/archival_objects/:id/previous</a></td>
+        <td>GET</td>
+        <td>Get the previous record in the tree for an Archival Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record">/repositories/:repo_id/archival_objects/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-this-repository-s-assessment-attribute-definitions">/repositories/:repo_id/assessment_attribute_definitions</a></td>
+        <td>POST</td>
+        <td>Update this repository's assessment attribute definitions</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-this-repository-s-assessment-attribute-definitions">/repositories/:repo_id/assessment_attribute_definitions</a></td>
+        <td>GET</td>
+        <td>Get this repository's assessment attribute definitions</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-assessment">/repositories/:repo_id/assessments</a></td>
+        <td>POST</td>
+        <td>Create an Assessment</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-assessments-for-a-repository">/repositories/:repo_id/assessments</a></td>
+        <td>GET</td>
+        <td>Get a list of Assessments for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-assessment">/repositories/:repo_id/assessments/:id</a></td>
+        <td>POST</td>
+        <td>Update an Assessment</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-assessment-by-id">/repositories/:repo_id/assessments/:id</a></td>
+        <td>GET</td>
+        <td>Get an Assessment by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-assessment">/repositories/:repo_id/assessments/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an Assessment</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#import-a-batch-of-records">/repositories/:repo_id/batch_imports</a></td>
+        <td>POST</td>
+        <td>Import a batch of records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-classification-term">/repositories/:repo_id/classification_terms</a></td>
+        <td>POST</td>
+        <td>Create a Classification Term</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-classification-terms-for-a-repository">/repositories/:repo_id/classification_terms</a></td>
+        <td>GET</td>
+        <td>Get a list of Classification Terms for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-classification-term">/repositories/:repo_id/classification_terms/:id</a></td>
+        <td>POST</td>
+        <td>Update a Classification Term</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-classification-term-by-id">/repositories/:repo_id/classification_terms/:id</a></td>
+        <td>GET</td>
+        <td>Get a Classification Term by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-classification-term">/repositories/:repo_id/classification_terms/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Classification Term</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-classification-terms-to-become-children-of-another-classification-term">/repositories/:repo_id/classification_terms/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Classification Terms to become children of another Classification Term</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-children-of-a-classification-term">/repositories/:repo_id/classification_terms/:id/children</a></td>
+        <td>GET</td>
+        <td>Get the children of a Classification Term</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#set-the-parent-position-of-a-classification-term-in-a-tree">/repositories/:repo_id/classification_terms/:id/parent</a></td>
+        <td>POST</td>
+        <td>Set the parent/position of a Classification Term in a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-classification">/repositories/:repo_id/classifications</a></td>
+        <td>POST</td>
+        <td>Create a Classification</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-classifications-for-a-repository">/repositories/:repo_id/classifications</a></td>
+        <td>GET</td>
+        <td>Get a list of Classifications for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-classification">/repositories/:repo_id/classifications/:id</a></td>
+        <td>GET</td>
+        <td>Get a Classification</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-classification">/repositories/:repo_id/classifications/:id</a></td>
+        <td>POST</td>
+        <td>Update a Classification</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-classification">/repositories/:repo_id/classifications/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Classification</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-classification-terms-to-become-children-of-a-classification">/repositories/:repo_id/classifications/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Classification Terms to become children of a Classification</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-classification-tree">/repositories/:repo_id/classifications/:id/tree</a></td>
+        <td>GET</td>
+        <td>Get a Classification tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-an-classification-term-record-within-a-tree">/repositories/:repo_id/classifications/:id/tree/node</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for an Classification Term record within a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-path-from-the-root-record-to-classification-terms">/repositories/:repo_id/classifications/:id/tree/node_from_root</a></td>
+        <td>GET</td>
+        <td>Fetch tree path from the root record to Classification Terms</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-the-top-level-classification-record">/repositories/:repo_id/classifications/:id/tree/root</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for the top-level classification record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-the-record-slice-for-a-given-tree-waypoint">/repositories/:repo_id/classifications/:id/tree/waypoint</a></td>
+        <td>GET</td>
+        <td>Fetch the record slice for a given tree waypoint</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-collection-management-record-by-id">/repositories/:repo_id/collection_management/:id</a></td>
+        <td>GET</td>
+        <td>Get a Collection Management Record by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#transfer-components-from-one-resource-to-another">/repositories/:repo_id/component_transfers</a></td>
+        <td>POST</td>
+        <td>Transfer components from one resource to another</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-preferences-records-for-the-current-repository-and-user">/repositories/:repo_id/current_preferences</a></td>
+        <td>GET</td>
+        <td>Get the Preferences records for the current repository and user.</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#save-defaults-for-a-record-type">/repositories/:repo_id/default_values/:record_type</a></td>
+        <td>POST</td>
+        <td>Save defaults for a record type</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-default-values-for-a-record-type">/repositories/:repo_id/default_values/:record_type</a></td>
+        <td>GET</td>
+        <td>Get default values for a record type</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-digital-object-component">/repositories/:repo_id/digital_object_components</a></td>
+        <td>POST</td>
+        <td>Create an Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-digital-object-components-for-a-repository">/repositories/:repo_id/digital_object_components</a></td>
+        <td>GET</td>
+        <td>Get a list of Digital Object Components for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-digital-object-component">/repositories/:repo_id/digital_object_components/:id</a></td>
+        <td>POST</td>
+        <td>Update an Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-digital-object-component-by-id">/repositories/:repo_id/digital_object_components/:id</a></td>
+        <td>GET</td>
+        <td>Get an Digital Object Component by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-digital-object-component">/repositories/:repo_id/digital_object_components/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-digital-object-components-to-become-children-of-a-digital-object-component">/repositories/:repo_id/digital_object_components/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Digital Object Components to become children of a Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#batch-create-several-digital-object-components-as-children-of-an-existing-digital-object-component">/repositories/:repo_id/digital_object_components/:id/children</a></td>
+        <td>POST</td>
+        <td>Batch create several Digital Object Components as children of an existing Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-children-of-an-digital-object-component">/repositories/:repo_id/digital_object_components/:id/children</a></td>
+        <td>GET</td>
+        <td>Get the children of an Digital Object Component</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#set-the-parent-position-of-an-digital-object-component-in-a-tree">/repositories/:repo_id/digital_object_components/:id/parent</a></td>
+        <td>POST</td>
+        <td>Set the parent/position of an Digital Object Component in a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record">/repositories/:repo_id/digital_object_components/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-digital-object">/repositories/:repo_id/digital_objects</a></td>
+        <td>POST</td>
+        <td>Create a Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-digital-objects-for-a-repository">/repositories/:repo_id/digital_objects</a></td>
+        <td>GET</td>
+        <td>Get a list of Digital Objects for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-digital-object">/repositories/:repo_id/digital_objects/:id</a></td>
+        <td>GET</td>
+        <td>Get a Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-digital-object">/repositories/:repo_id/digital_objects/:id</a></td>
+        <td>POST</td>
+        <td>Update a Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-digital-object">/repositories/:repo_id/digital_objects/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-digital-object-components-to-become-children-of-a-digital-object">/repositories/:repo_id/digital_objects/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Digital Object components to become children of a Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#batch-create-several-digital-object-components-as-children-of-an-existing-digital-object">/repositories/:repo_id/digital_objects/:id/children</a></td>
+        <td>POST</td>
+        <td>Batch create several Digital Object Components as children of an existing Digital Object</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#publish-a-digital-object-and-all-its-sub-records-and-components">/repositories/:repo_id/digital_objects/:id/publish</a></td>
+        <td>POST</td>
+        <td>Publish a digital object and all its sub-records and components</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record">/repositories/:repo_id/digital_objects/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#transfer-this-record-to-a-different-repository">/repositories/:repo_id/digital_objects/:id/transfer</a></td>
+        <td>POST</td>
+        <td>Transfer this record to a different repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-digital-object-tree">/repositories/:repo_id/digital_objects/:id/tree</a></td>
+        <td>GET</td>
+        <td>Get a Digital Object tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-an-digital-object-component-record-within-a-tree">/repositories/:repo_id/digital_objects/:id/tree/node</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for an Digital Object Component record within a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-paths-from-the-root-record-to-digital-object-components">/repositories/:repo_id/digital_objects/:id/tree/node_from_root</a></td>
+        <td>GET</td>
+        <td>Fetch tree paths from the root record to Digital Object Components</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-the-top-level-digital-object-record">/repositories/:repo_id/digital_objects/:id/tree/root</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for the top-level digital object record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-the-record-slice-for-a-given-tree-waypoint">/repositories/:repo_id/digital_objects/:id/tree/waypoint</a></td>
+        <td>GET</td>
+        <td>Fetch the record slice for a given tree waypoint</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-a-dublin-core-export">/repositories/:repo_id/digital_objects/dublin_core/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for a Dublin Core export</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-dublin-core-representation-of-a-digital-object">/repositories/:repo_id/digital_objects/dublin_core/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get a Dublin Core representation of a Digital Object </td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-a-mets-export">/repositories/:repo_id/digital_objects/mets/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for a METS export</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-mets-representation-of-a-digital-object">/repositories/:repo_id/digital_objects/mets/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get a METS representation of a Digital Object </td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-a-mods-export">/repositories/:repo_id/digital_objects/mods/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for a MODS export</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-mods-representation-of-a-digital-object">/repositories/:repo_id/digital_objects/mods/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get a MODS representation of a Digital Object </td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-event">/repositories/:repo_id/events</a></td>
+        <td>POST</td>
+        <td>Create an Event</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-events-for-a-repository">/repositories/:repo_id/events</a></td>
+        <td>GET</td>
+        <td>Get a list of Events for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-an-event">/repositories/:repo_id/events/:id</a></td>
+        <td>POST</td>
+        <td>Update an Event</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-event-by-id">/repositories/:repo_id/events/:id</a></td>
+        <td>GET</td>
+        <td>Get an Event by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-event-record">/repositories/:repo_id/events/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an event record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record-from-non-managers">/repositories/:repo_id/events/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record from non-managers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#find-archival-objects-by-ref-id-or-component-id">/repositories/:repo_id/find_by_id/archival_objects</a></td>
+        <td>GET</td>
+        <td>Find Archival Objects by ref_id or component_id</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#find-digital-object-components-by-component-id">/repositories/:repo_id/find_by_id/digital_object_components</a></td>
+        <td>GET</td>
+        <td>Find Digital Object Components by component_id</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#find-digital-objects-by-digital-object-id">/repositories/:repo_id/find_by_id/digital_objects</a></td>
+        <td>GET</td>
+        <td>Find Digital Objects by digital_object_id</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#find-resources-by-their-identifiers">/repositories/:repo_id/find_by_id/resources</a></td>
+        <td>GET</td>
+        <td>Find Resources by their identifiers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-group-within-a-repository">/repositories/:repo_id/groups</a></td>
+        <td>POST</td>
+        <td>Create a group within a repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-groups-for-a-repository">/repositories/:repo_id/groups</a></td>
+        <td>GET</td>
+        <td>Get a list of groups for a repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-group">/repositories/:repo_id/groups/:id</a></td>
+        <td>POST</td>
+        <td>Update a group</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-group-by-id">/repositories/:repo_id/groups/:id</a></td>
+        <td>GET</td>
+        <td>Get a group by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-group-by-id">/repositories/:repo_id/groups/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a group by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-new-job">/repositories/:repo_id/jobs</a></td>
+        <td>POST</td>
+        <td>Create a new job</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-jobs-for-a-repository">/repositories/:repo_id/jobs</a></td>
+        <td>GET</td>
+        <td>Get a list of Jobs for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-job">/repositories/:repo_id/jobs/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Job</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-job-by-id">/repositories/:repo_id/jobs/:id</a></td>
+        <td>GET</td>
+        <td>Get a Job by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#cancel-a-job">/repositories/:repo_id/jobs/:id/cancel</a></td>
+        <td>POST</td>
+        <td>Cancel a Job</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-job-s-log-by-id">/repositories/:repo_id/jobs/:id/log</a></td>
+        <td>GET</td>
+        <td>Get a Job's log by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-job-s-output-files-by-id">/repositories/:repo_id/jobs/:id/output_files</a></td>
+        <td>GET</td>
+        <td>Get a list of Job's output files by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-job-s-output-file-by-id">/repositories/:repo_id/jobs/:id/output_files/:file_id</a></td>
+        <td>GET</td>
+        <td>Get a Job's output file by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-job-s-list-of-created-uris">/repositories/:repo_id/jobs/:id/records</a></td>
+        <td>GET</td>
+        <td>Get a Job's list of created URIs</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-all-active-jobs-for-a-repository">/repositories/:repo_id/jobs/active</a></td>
+        <td>GET</td>
+        <td>Get a list of all active Jobs for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-all-archived-jobs-for-a-repository">/repositories/:repo_id/jobs/archived</a></td>
+        <td>GET</td>
+        <td>Get a list of all archived Jobs for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#list-all-supported-import-job-types">/repositories/:repo_id/jobs/import_types</a></td>
+        <td>GET</td>
+        <td>List all supported import job types</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-new-job-and-post-input-files">/repositories/:repo_id/jobs_with_files</a></td>
+        <td>POST</td>
+        <td>Create a new job and post input files</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-preferences-record">/repositories/:repo_id/preferences</a></td>
+        <td>POST</td>
+        <td>Create a Preferences record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-preferences-for-a-repository-and-optionally-a-user">/repositories/:repo_id/preferences</a></td>
+        <td>GET</td>
+        <td>Get a list of Preferences for a Repository and optionally a user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-preferences-record">/repositories/:repo_id/preferences/:id</a></td>
+        <td>GET</td>
+        <td>Get a Preferences record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-preferences-record">/repositories/:repo_id/preferences/:id</a></td>
+        <td>POST</td>
+        <td>Update a Preferences record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-preferences-record">/repositories/:repo_id/preferences/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Preferences record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-default-set-of-preferences-for-a-repository-and-optionally-a-user">/repositories/:repo_id/preferences/defaults</a></td>
+        <td>GET</td>
+        <td>Get the default set of Preferences for a Repository and optionally a user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-an-rde-template">/repositories/:repo_id/rde_templates</a></td>
+        <td>POST</td>
+        <td>Create an RDE template</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-rde-templates">/repositories/:repo_id/rde_templates</a></td>
+        <td>GET</td>
+        <td>Get a list of RDE Templates</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-rde-template-record">/repositories/:repo_id/rde_templates/:id</a></td>
+        <td>GET</td>
+        <td>Get an RDE template record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-an-rde-template">/repositories/:repo_id/rde_templates/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete an RDE Template</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#require-fields-for-a-record-type">/repositories/:repo_id/required_fields/:record_type</a></td>
+        <td>POST</td>
+        <td>Require fields for a record type</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-required-fields-for-a-record-type">/repositories/:repo_id/required_fields/:record_type</a></td>
+        <td>GET</td>
+        <td>Get required fields for a record type</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-export-metadata-for-a-resource-description">/repositories/:repo_id/resource_descriptions/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get export metadata for a Resource Description</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-ead-representation-of-a-resource">/repositories/:repo_id/resource_descriptions/:id.pdf</a></td>
+        <td>GET</td>
+        <td>Get an EAD representation of a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-ead-representation-of-a-resource">/repositories/:repo_id/resource_descriptions/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get an EAD representation of a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-export-metadata-for-resource-labels">/repositories/:repo_id/resource_labels/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get export metadata for Resource labels</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-tsv-list-of-printable-labels-for-a-resource">/repositories/:repo_id/resource_labels/:id.tsv</a></td>
+        <td>GET</td>
+        <td>Get a tsv list of printable labels for a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-resource">/repositories/:repo_id/resources</a></td>
+        <td>POST</td>
+        <td>Create a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-resources-for-a-repository">/repositories/:repo_id/resources</a></td>
+        <td>GET</td>
+        <td>Get a list of Resources for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-resource">/repositories/:repo_id/resources/:id</a></td>
+        <td>GET</td>
+        <td>Get a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-resource">/repositories/:repo_id/resources/:id</a></td>
+        <td>POST</td>
+        <td>Update a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-resource">/repositories/:repo_id/resources/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#move-existing-archival-objects-to-become-children-of-a-resource">/repositories/:repo_id/resources/:id/accept_children</a></td>
+        <td>POST</td>
+        <td>Move existing Archival Objects to become children of a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#batch-create-several-archival-objects-as-children-of-an-existing-resource">/repositories/:repo_id/resources/:id/children</a></td>
+        <td>POST</td>
+        <td>Batch create several Archival Objects as children of an existing Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-record-types-in-the-graph-of-a-resource">/repositories/:repo_id/resources/:id/models_in_graph</a></td>
+        <td>GET</td>
+        <td>Get a list of record types in the graph of a resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-list-of-uris-of-this-published-resource-and-all-published-archival-objects-contained-within-ordered-by-tree-order--i-e--if-you-fully-expanded-the-record-tree-and-read-from-top-to-bottom">/repositories/:repo_id/resources/:id/ordered_records</a></td>
+        <td>GET</td>
+        <td>Get the list of URIs of this published resource and all published archival objects contained within.Ordered by tree order (i.e. if you fully expanded the record tree and read from top to bottom)</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#publish-a-resource-and-all-its-sub-records-and-components">/repositories/:repo_id/resources/:id/publish</a></td>
+        <td>POST</td>
+        <td>Publish a resource and all its sub-records and components</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#suppress-this-record">/repositories/:repo_id/resources/:id/suppressed</a></td>
+        <td>POST</td>
+        <td>Suppress this record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-top-containers-linked-to-a-published-resource-and-published-archival-ojbects-contained-within">/repositories/:repo_id/resources/:id/top_containers</a></td>
+        <td>GET</td>
+        <td>Get Top Containers linked to a published resource and published archival ojbects contained within.</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#transfer-this-record-to-a-different-repository">/repositories/:repo_id/resources/:id/transfer</a></td>
+        <td>POST</td>
+        <td>Transfer this record to a different repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-resource-tree">/repositories/:repo_id/resources/:id/tree</a></td>
+        <td>GET</td>
+        <td>Get a Resource tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-an-archival-object-record-within-a-tree">/repositories/:repo_id/resources/:id/tree/node</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for an Archival Object record within a tree</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-paths-from-the-root-record-to-archival-objects">/repositories/:repo_id/resources/:id/tree/node_from_root</a></td>
+        <td>GET</td>
+        <td>Fetch tree paths from the root record to Archival Objects</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-tree-information-for-the-top-level-resource-record">/repositories/:repo_id/resources/:id/tree/root</a></td>
+        <td>GET</td>
+        <td>Fetch tree information for the top-level resource record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#fetch-the-record-slice-for-a-given-tree-waypoint">/repositories/:repo_id/resources/:id/tree/waypoint</a></td>
+        <td>GET</td>
+        <td>Fetch the record slice for a given tree waypoint</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-metadata-for-a-marc21-export">/repositories/:repo_id/resources/marc21/:id.:fmt/metadata</a></td>
+        <td>GET</td>
+        <td>Get metadata for a MARC21 export</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-marc-21-representation-of-a-resource">/repositories/:repo_id/resources/marc21/:id.xml</a></td>
+        <td>GET</td>
+        <td>Get a MARC 21 representation of a Resource</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-this-repository">/repositories/:repo_id/search</a></td>
+        <td>GET, POST</td>
+        <td>Search this repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-top-container">/repositories/:repo_id/top_containers</a></td>
+        <td>POST</td>
+        <td>Create a top container</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-topcontainers-for-a-repository">/repositories/:repo_id/top_containers</a></td>
+        <td>GET</td>
+        <td>Get a list of TopContainers for a Repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-top-container">/repositories/:repo_id/top_containers/:id</a></td>
+        <td>POST</td>
+        <td>Update a top container</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-top-container-by-id">/repositories/:repo_id/top_containers/:id</a></td>
+        <td>GET</td>
+        <td>Get a top container by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-top-container">/repositories/:repo_id/top_containers/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a top container</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-container-profile-for-a-batch-of-top-containers">/repositories/:repo_id/top_containers/batch/container_profile</a></td>
+        <td>POST</td>
+        <td>Update container profile for a batch of top containers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-ils-holding-id-for-a-batch-of-top-containers">/repositories/:repo_id/top_containers/batch/ils_holding_id</a></td>
+        <td>POST</td>
+        <td>Update ils_holding_id for a batch of top containers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-location-for-a-batch-of-top-containers">/repositories/:repo_id/top_containers/batch/location</a></td>
+        <td>POST</td>
+        <td>Update location for a batch of top containers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#bulk-update-barcodes">/repositories/:repo_id/top_containers/bulk/barcodes</a></td>
+        <td>POST</td>
+        <td>Bulk update barcodes</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#bulk-update-locations">/repositories/:repo_id/top_containers/bulk/locations</a></td>
+        <td>POST</td>
+        <td>Bulk update locations</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-for-top-containers">/repositories/:repo_id/top_containers/search</a></td>
+        <td>GET</td>
+        <td>Search for top containers</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#transfer-this-record-to-a-different-repository">/repositories/:repo_id/transfer</a></td>
+        <td>POST</td>
+        <td>Transfer this record to a different repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-user-s-details-including-their-groups-for-the-current-repository">/repositories/:repo_id/users/:id</a></td>
+        <td>GET</td>
+        <td>Get a user's details including their groups for the current repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-repository-with-an-agent-representation">/repositories/with_agent</a></td>
+        <td>POST</td>
+        <td>Create a Repository with an agent representation</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-repository-by-id--including-its-agent-representation">/repositories/with_agent/:id</a></td>
+        <td>GET</td>
+        <td>Get a Repository by ID, including its agent representation</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-repository-with-an-agent-representation">/repositories/with_agent/:id</a></td>
+        <td>POST</td>
+        <td>Update a repository with an agent representation</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-all-archivesspace-schemas">/schemas</a></td>
+        <td>GET</td>
+        <td>Get all ArchivesSpace schemas</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-an-archivesspace-schema">/schemas/:schema</a></td>
+        <td>GET</td>
+        <td>Get an ArchivesSpace schema</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-this-archive">/search</a></td>
+        <td>GET, POST</td>
+        <td>Search this archive</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-across-location-profiles">/search/location_profile</a></td>
+        <td>GET</td>
+        <td>Search across Location Profiles</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#find-the-tree-view-for-a-particular-archival-record">/search/published_tree</a></td>
+        <td>GET</td>
+        <td>Find the tree view for a particular archival record</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#return-the-counts-of-record-types-of-interest-by-repository">/search/record_types_by_repository</a></td>
+        <td>GET, POST</td>
+        <td>Return the counts of record types of interest by repository</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#return-a-set-of-records-by-uri">/search/records</a></td>
+        <td>GET, POST</td>
+        <td>Return a set of records by URI</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-across-repositories">/search/repositories</a></td>
+        <td>GET, POST</td>
+        <td>Search across repositories</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#search-across-subjects">/search/subjects</a></td>
+        <td>GET, POST</td>
+        <td>Search across subjects</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-location-by-id">/space_calculator/buildings</a></td>
+        <td>GET</td>
+        <td>Get a Location by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#calculate-how-many-containers-will-fit-in-locations-for-a-given-building">/space_calculator/by_building</a></td>
+        <td>GET</td>
+        <td>Calculate how many containers will fit in locations for a given building</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#calculate-how-many-containers-will-fit-in-a-list-of-locations">/space_calculator/by_location</a></td>
+        <td>GET</td>
+        <td>Calculate how many containers will fit in a list of locations</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-subject">/subjects</a></td>
+        <td>POST</td>
+        <td>Create a Subject</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-subjects">/subjects</a></td>
+        <td>GET</td>
+        <td>Get a list of Subjects</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-subject">/subjects/:id</a></td>
+        <td>POST</td>
+        <td>Update a Subject</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-subject-by-id">/subjects/:id</a></td>
+        <td>GET</td>
+        <td>Get a Subject by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-subject">/subjects/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a Subject</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-terms-matching-a-prefix">/terms</a></td>
+        <td>GET</td>
+        <td>Get a list of Terms matching a prefix</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-stream-of-updated-records">/update-feed</a></td>
+        <td>GET</td>
+        <td>Get a stream of updated records</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#refresh-the-list-of-currently-known-edits">/update_monitor</a></td>
+        <td>POST</td>
+        <td>Refresh the list of currently known edits</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-local-user">/users</a></td>
+        <td>POST</td>
+        <td>Create a local user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-users">/users</a></td>
+        <td>GET</td>
+        <td>Get a list of users</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-user-s-details--including-their-current-permissions">/users/:id</a></td>
+        <td>GET</td>
+        <td>Get a user's details (including their current permissions)</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-user-s-account">/users/:id</a></td>
+        <td>POST</td>
+        <td>Update a user's account</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#delete-a-user">/users/:id</a></td>
+        <td>DELETE</td>
+        <td>Delete a user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-user-s-groups">/users/:id/groups</a></td>
+        <td>POST</td>
+        <td>Update a user's groups</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#become-a-different-user">/users/:username/become-user</a></td>
+        <td>POST</td>
+        <td>Become a different user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#log-in">/users/:username/login</a></td>
+        <td>POST</td>
+        <td>Log in</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-system-users">/users/complete</a></td>
+        <td>GET</td>
+        <td>Get a list of system users</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-currently-logged-in-user">/users/current-user</a></td>
+        <td>GET</td>
+        <td>Get the currently logged in user</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-the-archivesspace-application-version">/version</a></td>
+        <td>GET</td>
+        <td>Get the ArchivesSpace application version</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#create-a-vocabulary">/vocabularies</a></td>
+        <td>POST</td>
+        <td>Create a Vocabulary</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-vocabularies">/vocabularies</a></td>
+        <td>GET</td>
+        <td>Get a list of Vocabularies</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#update-a-vocabulary">/vocabularies/:id</a></td>
+        <td>POST</td>
+        <td>Update a Vocabulary</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-vocabulary-by-id">/vocabularies/:id</a></td>
+        <td>GET</td>
+        <td>Get a Vocabulary by ID</td>
+      </tr>
+    
+      <tr>
+        <td><a href="#get-a-list-of-terms-for-a-vocabulary">/vocabularies/:id/terms</a></td>
+        <td>GET</td>
+        <td>Get a list of Terms for a Vocabulary</td>
+      </tr>
+    
+  </tbody>
+</table>
