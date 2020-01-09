@@ -13,11 +13,12 @@
 
       "level" => {"type" => "string", "ifmissing" => "error", "dynamic_enum" => "archival_record_level"},
       "other_level" => {"type" => "string", "maxLength" => 255},
+      "external_ark_url" => {"type" => "string", "required" => false},
 
       "title" => {"type" => "string", "maxLength" => 8192, "ifmissing" => nil},
 
       "slug" => {"type" => "string"},
-      "is_slug_auto" => {"type" => "boolean"},
+      "is_slug_auto" => {"type" => "boolean", "default" => true},
       
       "display_string" => {"type" => "string", "maxLength" => 8192, "readonly" => true},
 
@@ -95,6 +96,11 @@
       "representative_image" => {
         "type" => "JSONModel(:file_version) object",
         "readonly" => true
+      },
+      "ark_name" => {
+        "type" => "JSONModel(:ark_name) object",
+        "readonly" => true,
+        "required" => false
       }
 
     },

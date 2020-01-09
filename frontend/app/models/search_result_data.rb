@@ -73,7 +73,21 @@ class SearchResultData
       }
     }
     facet_data_for_filter.delete_if {|facet_group, facets| facets.empty?}
+    facet_data_for_filter.each do |facet_group, facets|
+      facet_data_for_filter[facet_group] = sort_facets(facet_group, facets)
+    end
     facet_data_for_filter
+  end
+
+  def sort_facets(facet_group, facets)
+    case facet_group
+    when 'accession_date_year'
+      f = facets.sort { |a, b| (b[0].to_i <=> a[0].to_i) * (AppConfig[:sort_accession_date_filter_asc] ? -1 : 1) }.to_h
+      f['9999'][:label] = I18n.t("accession.accession_date_unknown") if f['9999']
+      f
+    else
+      facets
+    end
   end
 
   def facet_display_string(facet_group, facet)
@@ -254,6 +268,10 @@ class SearchResultData
 
   def self.DIGITAL_OBJECT_FACETS
     ["subjects", "publish", "digital_object_type", "level", "primary_type"]
+  end
+
+  def self.CONTAINER_PROFILE_FACETS
+      ["container_profile_width_u_sstr", "container_profile_height_u_sstr", "container_profile_depth_u_sstr", "container_profile_dimension_units_u_sstr"]
   end
 
   def self.LOCATION_FACETS

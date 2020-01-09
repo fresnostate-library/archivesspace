@@ -43,7 +43,7 @@ module ASpaceExport
         results = []
         linked = self.linked_agents || []
         linked.each_with_index do |link, i|
-          next if link['role'] == 'creator'
+          next if link['role'] == 'creator' || (link['_resolved']['publish'] == false && !@include_unpublished)
           role = link['relator'] ? link['relator'] : (link['role'] == 'source' ? 'fmo' : nil)
 
           agent = link['_resolved'].dup
@@ -62,6 +62,7 @@ module ASpaceExport
                       when 'agent_person'; 'persname'
                       when 'agent_family'; 'famname'
                       when 'agent_corporate_entity'; 'corpname'
+                      when 'agent_software'; 'name'
                       end
 
           atts = {}
@@ -69,6 +70,7 @@ module ASpaceExport
           atts[:source] = source if source
           atts[:rules] = rules if rules
           atts[:authfilenumber] = authfilenumber if authfilenumber
+          atts[:audience] = 'internal' if link['_resolved']['publish'] == false
 
           results << {:node_name => node_name, :atts => atts, :content => content}
         end

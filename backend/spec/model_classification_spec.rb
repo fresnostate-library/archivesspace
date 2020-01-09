@@ -1,4 +1,5 @@
 require 'spec_helper'
+require_relative 'spec_slugs_helper'
 
 describe 'Classification models' do
 
@@ -157,115 +158,96 @@ describe 'Classification models' do
     expect(JSONModel(:classification_term).find(term.id).linked_records.map {|link| link['ref'] }).to include(resource.uri)
 
   end
-  
+
   describe "slug tests" do
-    it "autogenerates a slug via title when configured to generate by name" do
-      AppConfig[:auto_generate_slugs_with_id] = false 
-
-      classification = Classification.create_from_json(build(:json_classification))
-      
-
-      classification_rec = Classification.where(:id => classification[:id]).first.update(:is_slug_auto => 1)
-
-      expected_slug = classification_rec[:title].gsub(" ", "_")
-                                           .gsub(/[&;?$<>#%{}|\\^~\[\]`\/@=:+,!]/, "")
-
-      expect(classification_rec[:slug]).to eq(expected_slug)
+    before(:all) do
+      AppConfig[:use_human_readable_urls] = true
     end
 
-    it "autogenerates a slug via identifier when configured to generate by id" do
-      AppConfig[:auto_generate_slugs_with_id] = true
+    describe "slug autogen enabled" do
+      describe "by name" do
+        before(:all) do
+          AppConfig[:auto_generate_slugs_with_id] = false
+        end
+        it "autogenerates a slug via title" do
+          classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :title => rand(100000).to_s))
+          expected_slug = clean_slug(classification[:title])
+          expect(classification[:slug]).to eq(expected_slug)
+        end
+        it "cleans slug" do
+          classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :title => "Foo Bar Baz&&&&"))
+          expect(classification[:slug]).to eq("foo_bar_baz")
+        end
 
-      classification = Classification.create_from_json(build(:json_classification))
-      
-
-      classification_rec = Classification.where(:id => classification[:id]).first.update(:is_slug_auto => 1)
-
-      expected_slug = classification_rec[:identifier].gsub(" ", "_")
-                                                .gsub(/[&;?$<>#%{}|\\^~\[\]`\/@=:+,!]/, "")
-                                                .gsub('"', '')
-                                                .gsub('null', '')
-
-      expect(classification_rec[:slug]).to eq(expected_slug)
-    end
-
-    describe "slug code does not run" do
-      it "does not execute slug code when auto-gen on id and title is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = true
-  
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => true}))
-
-        expect(classification).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-  
-        classification.update(:title => "foobar")
+        it "dedupes slug" do
+          classification1 = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :title => "foo"))
+          classification2 = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :title => "foo"))
+          expect(classification1[:slug]).to eq("foo")
+          expect(classification2[:slug]).to eq("foo_1")
+        end
+        it "turns off autogen if slug is blank" do
+          classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => true))
+          classification.update(:slug => "")
+          expect(classification[:is_slug_auto]).to eq(0)
+        end
       end
+      describe "by id" do
+        before(:all) do
+          AppConfig[:auto_generate_slugs_with_id] = true
+        end
+        it "autogenerates a slug via identifier" do
+          classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => true))
+          expected_slug = clean_slug(classification[:identifier])
+          expect(classification[:slug]).to eq(expected_slug)
+        end
+        it "cleans slug" do
+          classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :identifier => "Foo Bar Baz&&&&"))
+          expect(classification[:slug]).to eq("foo_bar_baz")
+        end
 
-      it "does not execute slug code when auto-gen on title and id is changed" do
+        it "dedupes slug" do
+          classification1 = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :identifier => "foo"))
+          classification2 = Classification.create_from_json(build(:json_classification, :is_slug_auto => true, :identifier => "foo#"))
+          expect(classification1[:slug]).to eq("foo")
+          expect(classification2[:slug]).to eq("foo_1")
+        end
+      end
+    end
+
+    describe "slug autogen disabled" do
+      before(:all) do
         AppConfig[:auto_generate_slugs_with_id] = false
-  
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => true}))
-  
-        expect(classification).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-  
-        classification.update(:identifier => "foobar")
       end
-  
-      it "does not execute slug code when auto-gen off and title, identifier changed" do
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => false}))
-  
-        expect(classification).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-  
-        classification.update(:id_0 => "foobar")
-        classification.update(:title => "barfoo")
+      it "slug does not change when config set to autogen by title and title updated" do
+        classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => false, :slug => "foo"))
+        classification.update(:title => rand(100000000))
+        expect(classification[:slug]).to eq("foo")
+      end
+
+      it "slug does not change when config set to autogen by id and id updated" do
+        classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => false, :slug => "foo"))
+        classification.update(:identifier => rand(100000000))
+        expect(classification[:slug]).to eq("foo")
       end
     end
 
-    describe "slug code runs" do
-      it "executes slug code when auto-gen on id and id is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = true
-  
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => true}))
-  
-        expect(classification).to receive(:auto_gen_slug!)
-        expect(SlugHelpers).to receive(:clean_slug)
-        
-        pending("no idea why this is failing. Testing this manually in app works as expected")
-  
-        classification.update(:identifier => 'foo')
+    describe "manual slugs" do
+      it "cleans manual slugs" do
+        classification = Classification.create_from_json(build(:json_classification, :is_slug_auto => false))
+        classification.update(:slug => "Foo Bar Baz ###")
+
+        expect(classification[:slug]).to eq("foo_bar_baz")
       end
 
-      it "executes slug code when auto-gen on title and title is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = false
-  
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => true}))
-  
-        expect(classification).to receive(:auto_gen_slug!)
-  
-        classification.update(:title => "foobar")
-      end
+      it "dedupes manual slugs" do
+        classification1 = Classification.create_from_json(build(:json_classification, :is_slug_auto => false, :slug => "foo"))
+        classification2 = Classification.create_from_json(build(:json_classification, :is_slug_auto => false))
 
-      it "executes slug code when autogen is turned on" do
-        AppConfig[:auto_generate_slugs_with_id] = false
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => false}))
-  
-        expect(classification).to receive(:auto_gen_slug!)
-  
-        classification.update(:is_slug_auto => 1)
-      end
+        classification2.update(:slug => "foo")
 
-      it "executes slug code when autogen is off and slug is updated" do
-        classification = Classification.create_from_json(build(:json_classification, {:is_slug_auto => false}))
-  
-        expect(SlugHelpers).to receive(:clean_slug)
-  
-        classification.update(:slug => "snow white")
+        expect(classification1[:slug]).to eq("foo")
+        expect(classification2[:slug]).to eq("foo_1")
       end
     end
-
   end
-
-
 end

@@ -11,17 +11,23 @@ class ASFopExternal
   attr_accessor :output
   attr_accessor :xslt
 
-  def initialize(source, job)
+  def initialize(source, job, pdf_image)
    @source = source
    @fo = ASUtils.tempfile('pdf.xml')
    @output_path = ASUtils.tempfile_name('fop.pdf')
-   @xslt = File.read( StaticAssetFinder.new(File.join('stylesheets')).find('as-ead-pdf.xsl')) 
+   if pdf_image.nil?
+     @pdf_image = "file:///" + File.absolute_path(StaticAssetFinder.new(File.join('stylesheets')).find('archivesspace.small.png'))
+   else
+     @pdf_image = pdf_image
+   end
+   @xslt = File.read( StaticAssetFinder.new(File.join('stylesheets')).find('as-ead-pdf.xsl'))
+   @config = StaticAssetFinder.new(File.join('stylesheets')).find('fop-config.xml')
    @job = job
   end
 
   def to_fo
     transformer = Saxon.XSLT(@xslt, system_id: File.join(ASUtils.find_base_directory, 'stylesheets', 'as-ead-pdf.xsl') )
-    transformer.transform(Saxon.XML(@source)).to_s
+    transformer.transform(Saxon.XML(@source), {"pdf_image" => "\'#{@pdf_image}\'"}).to_s
   end
 
   def to_pdf
@@ -32,7 +38,7 @@ class ASFopExternal
     # execute command to convert PDF to tempfile specified
     # our command is of the form
     # java -jar PATH_TO_FOP_JAR org.apache.fop.cli.Main -fo PATH_TO_INPUT_XML -pdf PATH_TO_OUTPUT_XML
-    command = "cd #{path_to_fop_jar} #{multiple_command_operator} \"#{AppConfig[:path_to_java]}\" -jar fop.jar org.apache.fop.cli.Main -fo \"#{@fo.path}\" -pdf \"#{@output_path}\" 2>&1"
+    command = "cd #{path_to_fop_jar} #{multiple_command_operator} \"#{AppConfig[:path_to_java]}\" -jar fop.jar org.apache.fop.cli.Main -c \"#{@config}\" -fo \"#{@fo.path}\" -pdf \"#{@output_path}\" 2>&1"
     @job.write_output("Executing: #{command}")
 
     output = `#{command}`
@@ -83,7 +89,7 @@ class ASFopExternal
     def multiple_command_operator
       if RbConfig::CONFIG['host_os'] =~ /win32/
         return "&"
-      else 
+      else
         return ";"
       end
     end

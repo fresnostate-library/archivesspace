@@ -10,7 +10,7 @@
     <%= render_aspace_partial :partial => "accessions/toolbar" %>
     <div class="record-pane">
       <%= readonly_context :accession, @accession do |readonly| %>
-          <h2><%= @accession.display_string %> <span class="label label-info label-default"><%= I18n.t("accession._singular") %></span></h2>
+          <h2><%= clean_mixed_content(@accession.display_string) %> <span class="label label-info label-default"><%= I18n.t("accession._singular") %></span></h2>
 
           <%= render_aspace_partial :partial => "shared/flash_messages" %>
 
@@ -20,7 +20,9 @@
 
             <%= readonly.label_and_textarea "title" %>
             <%= readonly.label_and_fourpartid %>
-            <%= readonly.label_with_field "public_url", readonly.slug_url_field("slug", session[:repo_slug], AppConfig[:repo_slug_in_URL]) if AppConfig[:use_human_readable_URLs] %>
+
+            <%= render_aspace_partial :partial => "shared/public_url", :locals => {:form_object => readonly} if AppConfig[:use_human_readable_urls] %>
+
             <%= readonly.label_and_date "accession_date" %>
             <%= readonly.label_and_textarea "content_description" %>
             <%= readonly.label_and_textarea "condition_description" %>

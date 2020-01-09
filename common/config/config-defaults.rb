@@ -73,7 +73,7 @@ AppConfig[:mysql_binlog] = false
 
 # By default, Solr backups will run at midnight.  See https://crontab.guru/ for
 # information about the schedule syntax.
-AppConfig[:solr_backup_schedule] = "0 * * * *"
+AppConfig[:solr_backup_schedule] = "0 0 * * *"
 AppConfig[:solr_backup_number_to_keep] = 1
 AppConfig[:solr_backup_directory] = proc { File.join(AppConfig[:data_directory], "solr_backups") }
 # add default solr params, i.e. use AND for search: AppConfig[:solr_params] = { "q.op" => "AND" }
@@ -85,6 +85,8 @@ AppConfig[:solr_backup_directory] = proc { File.join(AppConfig[:data_directory],
 #      "pf" => 'title^10',
 #      "ps" => 0,
 #    }
+# For more information about solr parameters, please consult the solr documentation
+# here: https://lucene.apache.org/solr/
 # Configuring search operator to be AND by default - ANW-427
 AppConfig[:solr_params] = { "q.op" => "AND" }
 
@@ -299,8 +301,9 @@ AppConfig[:allow_user_registration] = true
 
 # Help Configuration
 AppConfig[:help_enabled] = true
-AppConfig[:help_url] = "http://docs.archivesspace.org"
+AppConfig[:help_url] = "https://archivesspace.atlassian.net/wiki/spaces/ArchivesSpaceUserManual/overview"
 AppConfig[:help_topic_prefix] = "/Default_CSH.htm#"
+AppConfig[:help_topic_base_url] = "https://archivesspace.atlassian.net/wiki/spaces/ArchivesSpaceUserManual/pages/"
 
 
 AppConfig[:shared_storage] = proc { File.join(AppConfig[:data_directory], "shared") }
@@ -385,8 +388,8 @@ AppConfig[:record_inheritance] = {
                             :inherit_directly => false
                           },
                           {
-                            :property => 'language',
-                            :inherit_directly => true
+                            :property => 'lang_materials',
+                            :inherit_directly => false
                           },
                           {
                             :property => 'dates',
@@ -480,7 +483,6 @@ AppConfig[:record_inheritance] = {
 AppConfig[:pui_search_results_page_size] = 10
 AppConfig[:pui_branding_img] = 'archivesspace.small.png'
 AppConfig[:pui_block_referrer] = true # patron privacy; blocks full 'referrer' when going outside the domain
-AppConfig[:pui_enable_staff_link] = true # attempt to add a link back to the staff interface
 
 # The number of PDFs that can be generated (in the background) at the same time.
 #
@@ -512,9 +514,6 @@ AppConfig[:pui_hide][:classification_badge] = false
 AppConfig[:pui_hide][:counts] = false
 # The following determines globally whether the 'container inventory' navigation tab/pill is hidden on resource/collection page
 AppConfig[:pui_hide][:container_inventory] = false
-# Other usage examples:
-# Don't display the accession ("unprocessed material") link on the main navigation menu
-# AppConfig[:pui_hide][:accessions] = true
 
 # Whether to display linked decaccessions
 AppConfig[:pui_display_deaccessions] = true
@@ -527,6 +526,12 @@ AppConfig[:pui_page_actions_cite] = true
 AppConfig[:pui_page_actions_bookmark] = true
 AppConfig[:pui_page_actions_request] = true
 AppConfig[:pui_page_actions_print] = true
+
+# when a user is authenticated, add a link back to the staff interface from the specified record
+AppConfig[:pui_enable_staff_link] = true
+# by default, staff link will open record in staff interface in edit mode,
+# change this to 'readonly' for it to open in readonly mode
+AppConfig[:pui_staff_link_mode] = 'edit'
 
 # PUI Request Function (used when AppConfig[:pui_page_actions_request] = true)
 # the following determine on what kinds of records the request button is displayed
@@ -615,14 +620,46 @@ AppConfig[:pui_page_custom_actions] = []
 #   'erb_partial' => 'shared/my_special_action',
 # }
 
-AppConfig[:use_human_readable_URLs] = true
+# For Accessions browse set if accession date year filter values should be sorted ascending rather than descending (default)
+AppConfig[:sort_accession_date_filter_asc] = false
 
-# Use the repository in slug based URLs
-# Warning: setting repo_slug_in_URL to true when it has previously been set to false will break links, unless all slugs are regenerated.
-AppConfig[:repo_slug_in_URL] = false
+# Human-Readable URLs options
+# use_human_readable_urls: determines whether fields and options related to human-readable URLs appear in the staff interface
 
-# Autogenerate slugs based on IDs. If this is set to false, then slugs will autogenerate based on name.
+# Changing this option will not remove or clear any slugs that exist currently.
+# This setting only affects links that are displayed. URLs that point to valid slugs will still work.
+# WARNING: Changing this setting may require an index rebuild for changes to take effect.
+
+AppConfig[:use_human_readable_urls] = false
+
+# Use the repository in human-readable URLs
+# Warning: setting repo_name_in_slugs to true when it has previously been set to false will break links, unless all slugs are regenerated.
+AppConfig[:repo_name_in_slugs] = false
+
+# Autogenerate slugs based on IDs. If this is set to false, then slugs will autogenerate based on name or title.
 AppConfig[:auto_generate_slugs_with_id] = false
 
 # For Resources: if this option and auto_generate_slugs_with_id are both enabled, then slugs for Resources will be generated with EADID instead of the identifier.
 AppConfig[:generate_resource_slugs_with_eadid] = false
+
+# For archival objects: if this option and auto_generate_slugs_with_id are both enabled, then slugs for archival resources will be generated with Component Unique Identifier instead of the identifier.
+AppConfig[:generate_archival_object_slugs_with_cuid] = false
+
+# Determines if the subject source is shown along with the subject heading in records' subject listings
+# This can help differentiate between subjects with the same heading
+AppConfig[:show_source_in_subject_listing] = false
+
+# ARKs configuration options
+# determines whether fields and options related to ARKs appear in the staff interface
+AppConfig[:arks_enabled] = false
+
+# If you are planning on using ARKs, change this to a valid, registered NAAN.
+# Institutional NAAN value to use in ARK URLs.
+AppConfig[:ark_naan] = "99999"
+
+# URL prefix to use in ARK URLs.
+# In most cases this will be the same as the PUI URL.
+AppConfig[:ark_url_prefix] = proc { AppConfig[:public_proxy_url] }
+
+# Specifies if the fields that show up in csv should be limited to those in search results
+AppConfig[:limit_csv_fields] = true

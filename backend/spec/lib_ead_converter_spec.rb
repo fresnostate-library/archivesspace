@@ -38,7 +38,7 @@ describe 'EAD converter' do
   <c id="2" level="file">
     <unittitle>whatever</unittitle>
     <container id="cid3" type="Box" label="Text">FOO</container>
-    <controlaccess><persname rules="dacs" source='local' id='thesame'>Art, Makah</persname></controlaccess>
+    <controlaccess><persname rules="dacs" source='local' authfilenumber='thesame'>Art, Makah</persname></controlaccess>
   </c>
 </c>
 </dsc>
@@ -247,7 +247,11 @@ ANEAD
     end
 
     it "maps '<langusage>' correctly" do
-      expect(@resource['finding_aid_language']).to eq('Resource-FindingAidLanguage-AT')
+      expect(@resource['finding_aid_language_note']).to eq('Resource-FindingAidLanguage-AT')
+    end
+
+    it "maps '<langusage><language>' correctly" do
+      expect(@resource['finding_aid_language']).to eq('und')
     end
 
     it "maps '<revisiondesc>' correctly" do
@@ -272,6 +276,9 @@ ANEAD
       expect(linked['role']).to eq('subject')
 
       #   ELSE
+      #   Respect audience attribute as set in at-tracer.xml
+      expect(c1['publish']).to be_falsey
+      expect(c2['publish']).to be_truthy
       #   IF @rules != NULL ==> name_corporate_entity.rules
       expect([c1, c2].map {|c| c['names'][0]['rules']}.uniq).to eq(['dacs'])
       #   IF @source != NULL ==> name_corporate_entity.source
@@ -292,6 +299,9 @@ ANEAD
       n2 = fams.find{|f| f['uri'] == links.find{|l| l['role'] == 'subject' }['ref'] }['names'][0]['family_name']
       expect(n2).to eq("FNames-FamilyName-AT, FNames-Prefix-AT, FNames-Qualifier-AT -- Pictorial works")
       #   ELSE
+      #   Respect audience attribute as set in at-tracer.xml
+      expect(fams.find{|f| f['uri'] == links.find{|l| l['role'] == 'creator' }['ref'] }['publish']).to be_falsey
+      expect(fams.find{|f| f['uri'] == links.find{|l| l['role'] == 'subject' }['ref'] }['publish']).to be_truthy
       #   IF @rules != NULL
       expect(fams.map{|f| f['names'][0]['rules']}.uniq).to eq(['aacr'])
       #   IF @source != NULL
@@ -306,6 +316,8 @@ ANEAD
       #   IF nested in <controlaccess>
       expect(@archival_objects['06']['linked_agents'].reverse.find {|l| @people.map{|p| p['uri'] }.include?(l['ref'])}['role']).to eq('subject')
       #   ELSE
+      #   If audience attribute is not present in at-tracer.xml, default to unpublished
+      expect(@people.map {|p| p['publish']}.uniq).to eq([false])
       #   IF @rules != NULL
       expect(@people.map {|p| p['names'][0]['rules']}.uniq).to eq(['local'])
       #   IF @source != NULL
@@ -436,7 +448,7 @@ ANEAD
     end
 
     it "maps '<langmaterial>' correctly" do
-      expect(@archival_objects['06']['language']).to eq('eng')
+      expect(@archival_objects['06']['lang_materials'][0]['language_and_script']['language']).to eq('eng')
     end
 
     it "maps '<legalstatus>' correctly" do
@@ -841,11 +853,11 @@ ANEAD
     end
 
     it "only maps <language> content to one place" do
-      expect(@resource['language']).to eq 'eng'
-      expect(get_note_by_type(@resource, 'langmaterial')).to be_nil
+      expect(@resource['lang_materials'][0]['language_and_script']['language']).to eq 'eng'
+      expect(@resource['lang_materials'].map {|l| l['notes']}.compact.reject {|e|  e == [] }).to be_empty
 
-      expect(@component['language']).to eq 'eng'
-      expect(get_note_by_type(@component, 'langmaterial')).to be_nil
+      expect(@component['lang_materials'][0]['language_and_script']['language']).to eq 'eng'
+      expect(@component['lang_materials'].map {|l| l['notes']}.compact.reject {|e|  e == [] }).to be_empty
     end
 
     it "maps <head> tag to note label, but not to note content" do
@@ -914,9 +926,9 @@ ANEAD
     it "should map the langcode to language, and the language text to a note" do
       json = convert(test_doc)
       resource = json.select {|rec| rec['jsonmodel_type'] == 'resource'}.last
-      expect(resource['language']).to eq('eng')
+      expect(resource['lang_materials'][0]['language_and_script']['language']).to eq('eng')
 
-      langmaterial = get_note_by_type(resource, 'langmaterial')
+      langmaterial = get_note_by_type(resource['lang_materials'][1], 'langmaterial')
       expect(note_content(langmaterial)).to eq('English')
     end
   end
@@ -1351,6 +1363,80 @@ ANEAD
 
   end
 
+  describe 'Mapping revision statement publish' do
+    def test_doc
+      src = <<ANEAD
+<?xml version="1.0" encoding="utf-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+  <eadheader countryencoding="iso3166-1" dateencoding="iso8601" langencoding="iso639-2b"
+    repositoryencoding="iso15511">
+    <eadid/>
+    <filedesc>
+      <titlestmt>
+        <titleproper>Resource with one unpublished revision
+            statement<num>unpub.revision.statement</num></titleproper>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Your Name Here Special Collections</publisher>
+      </publicationstmt>
+    </filedesc>
+    <profiledesc>
+      <creation>This finding aid was produced using ArchivesSpace on <date>2019-04-02 15:41:55
+          +0000</date>.</creation>
+    </profiledesc>
+    <revisiondesc>
+      <change audience="internal">
+        <date>Unpublished revision date</date>
+        <item>Unpublished revision description</item>
+      </change>
+      <change>
+        <date>Published revision date</date>
+        <item>Published revision description</item>
+      </change>
+    </revisiondesc>
+  </eadheader>
+  <archdesc level="collection">
+    <did>
+      <langmaterial>
+        <language langcode="eng">English</language>
+      </langmaterial>
+      <repository>
+        <corpname>Your Name Here Special Collections</corpname>
+      </repository>
+      <unittitle>Resource with one unpublished revision statement</unittitle>
+      <unitid>unpub.revision.statement</unitid>
+      <physdesc altrender="whole">
+        <extent altrender="materialtype spaceoccupied">1 Cassettes</extent>
+      </physdesc>
+      <unitdate normal="2019-04-11/2019-04-11">2019-04-11</unitdate>
+    </did>
+    <dsc/>
+  </archdesc>
+</ead>
+ANEAD
+
+      get_tempfile_path(src)
+    end
+
+    before(:all) do
+      parsed = convert(test_doc)
+      @revision_statements = parsed.select {|r| r['jsonmodel_type'] == 'resource' }.first['revision_statements']
+    end
+
+    it "creates an unpublished revision statement for a <change> tag with audience=internal" do
+      rs = @revision_statements[0]
+      expect(rs['description']).to eq("Unpublished revision description")
+      expect(rs['publish']).to be_falsey
+    end
+
+    it "creates a publihed revision statement for a <change> tag without audience=internal" do
+      rs = @revision_statements[1]
+      expect(rs['description']).to eq("Published revision description")
+      expect(rs['publish']).to be_truthy
+    end
+  end
 
 
 end

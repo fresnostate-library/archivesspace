@@ -497,12 +497,8 @@ class EAD3Serializer < EADSerializer
               }
             end
 
-            unless data.language.nil?
-              xml.langmaterial {
-                xml.language(:langcode => data.language) {
-                  xml.text I18n.t("enumerations.language_iso639_2.#{ data.language }", :default => data.language)
-                }
-              }
+            unless (languages = data.lang_materials).empty?
+              serialize_languages(languages, xml, @fragments)
             end
 
             data.instances_with_sub_containers.each do |instance|
@@ -588,8 +584,12 @@ class EAD3Serializer < EADSerializer
 
     xml.control(control_atts) {
 
+      ark_url = AppConfig[:arks_enabled] ? ArkName::get_ark_url(data.id, :resource) : nil
+
+      ins_url = ark_url.nil? ? data.ead_location : ark_url
+
       recordid_atts = {
-        instanceurl: data.ead_location
+        instanceurl: ins_url
       }
 
       xml.recordid(recordid_atts) {
@@ -731,13 +731,19 @@ class EAD3Serializer < EADSerializer
       unless data.finding_aid_language.nil?
         xml.languagedeclaration() {
 
-          xml.language() {
-            strip_tags_and_sanitize( data.finding_aid_language, xml, fragments )
+          xml.language({ langcode: "#{data.finding_aid_language}"}) {
+            xml.text(I18n.t("enumerations.language_iso639_2.#{data.finding_aid_language}"))
           }
 
-          xml.script({ scriptcode: "Latn" }) {
-            xml.text('Latin')
+          xml.script({ scriptcode: "#{data.finding_aid_script}" }) {
+            xml.text(I18n.t("enumerations.script_iso15924.#{data.finding_aid_script}"))
           }
+
+          unless data.finding_aid_language_note.nil?
+            xml.descriptivenote {
+              sanitize_mixed_content(data.finding_aid_language_note, xml, fragments, true)
+            }
+          end
 
         }
       end
@@ -776,9 +782,10 @@ class EAD3Serializer < EADSerializer
           }
         }
 
-        if data.revision_statements.length > 0
-          data.revision_statements.each do |rs|
-            xml.maintenanceevent() {
+        export_rs = @include_unpublished ? data.revision_statements : data.revision_statements.reject { |rs| !rs['publish'] }
+        if export_rs.length > 0
+          export_rs.each do |rs|
+            xml.maintenanceevent(rs['publish'] ? nil : {:audience => 'internal'}) {
               xml.eventtype( { value: 'revised' } ) {}
               xml.eventdatetime() {
                 xml.text(rs['date'].to_s)
@@ -983,6 +990,40 @@ class EAD3Serializer < EADSerializer
     end
   end
 
+  def serialize_languages(languages, xml, fragments)
+    language_vals = languages.map{|l| l['language_and_script']}.compact
+    # Language and Script subrecords with recorded values in both fields should be exported as <languageset> elements.
+    xml.langmaterial {
+      language_vals.map {|language|
+        if !language['script']
+          xml.language(:langcode => language['language']) {
+            xml.text I18n.t("enumerations.language_iso639_2.#{language['language']}", :default => language['language'])
+            }
+        # Language and Script subrecord entries with only a Language value record should be exported as <language> elements.
+        else
+          xml.languageset {
+           xml.language(:langcode => language['language']) {
+            xml.text I18n.t("enumerations.language_iso639_2.#{language['language']}", :default => language['language'])
+            }
+            xml.script(:scriptcode => language['script']) {
+             xml.text I18n.t("enumerations.script_iso15924.#{language['script']}", :default => language['script'])
+            }
+          }
+        end
+      }
+      # Language Text subrecord content should be exported as a <descriptivenote> element
+      language_notes = languages.map {|l| l['notes']}.compact.reject {|e|  e == [] }.flatten
+      if !language_notes.empty?
+        language_notes.each do |note|
+          content = ASpaceExport::Utils.extract_note_text(note)
+          xml.descriptivenote {
+            sanitize_mixed_content(content, xml, fragments, true)
+          }
+        end
+      end
+    }
+  end
+
 
   def serialize_note_content(note, xml, fragments)
     return if note["publish"] === false && !@include_unpublished
@@ -1033,6 +1074,7 @@ class EAD3Serializer < EADSerializer
                     when 'agent_person'; 'persname'
                     when 'agent_family'; 'famname'
                     when 'agent_corporate_entity'; 'corpname'
+                    when 'agent_software'; 'name'
                     end
         xml.origination(:label => role) {
 
@@ -1086,6 +1128,19 @@ class EAD3Serializer < EADSerializer
           xml.unittitle {  sanitize_mixed_content( val,xml, fragments) }
         end
 
+        if AppConfig[:arks_enabled]
+          ark_url = ArkName::get_ark_url(data.id, :archival_object)
+          if ark_url
+            # <unitid><ref href=”ARK” show="new" actuate="onload">ARK</ref></unitid>
+            xml.unitid {
+              xml.ref ({"href" => ark_url,
+                        "actuate" => "onload",
+                        "show" => "new"
+                        }) { xml.text 'Archival Resource Key' }
+                        }
+          end
+        end
+
         if !data.component_id.nil? && !data.component_id.empty?
           xml.unitid data.component_id
         end
@@ -1100,6 +1155,10 @@ class EAD3Serializer < EADSerializer
         serialize_extents(data, xml, fragments)
         serialize_dates(data, xml, fragments)
         serialize_did_notes(data, xml, fragments)
+
+        unless (languages = data.lang_materials).empty?
+          serialize_languages(languages, xml, fragments)
+        end
 
         EADSerializer.run_serialize_step(data, xml, fragments, :did)
 

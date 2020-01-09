@@ -63,6 +63,7 @@ en:
     transfer_successful: Transfer Successful.  Records may take a moment to appear in the target repository while re-indexing takes place.
     transfer_failed: Transfer Failed
     transfer_failed_records_using_digital_objects: "The following records link to digital objects that would be transferred, but doing so would break their instance links"
+    transfer_failed_digital_objects_linked_to_records: "This digital object links to other records held in this repository. To proceed with this transfer, remove the links in the following records"
     unset_default: Unset Default
     unsuppress: Unsuppress
     unsuppress_confirm_title: Unsuppress this Record?
@@ -98,7 +99,7 @@ en:
     publish_confirm_message: "<p>Performing this action will publish this record, any sub-records (External Documents, Notes, etc) and all components in the hierarchy.</p>"
     view_search_results: Go to Search Results
     view_published: View Published
-    print_to_pdf: Print Resource To PDF
+    print_to_pdf: Generate PDF
     resource_to_pdf: Resource to Print
     download_pdf: Download PDF
     download_report: Download Report
@@ -139,6 +140,7 @@ en:
   search_results:
     title: Search Results
     context: Found in
+    selected: Selected?
     no_results: No records found
     no_results_prefix: There were no search results for
     result_type: Record Type
@@ -147,6 +149,7 @@ en:
     filtered_by: Filtered By
     modified: Last Modified by
     created: Created by
+    actions: Actions
     text_placeholder: Filter by text
     clear_all: Clear All
     component_switch: Show Components
@@ -158,7 +161,6 @@ en:
       level: Level
       classification_path: Classification
       accession_date_year: Accession Date
-      creators: Creator
       source: Source
       rules: Rules
       parent_type: Record Type
@@ -308,8 +310,8 @@ en:
     manage_top_containers: Manage Top Containers
     manage_enumerations: Manage Controlled Value Lists
     global_preferences: Global Preferences
-    user_repo_preferences: Repository Preferences
-    repo_preferences: User Preferences
+    user_repo_preferences: User Preferences
+    repo_preferences: Repository Preferences
     manage_user_access: Manage User Access
     logout: Logout
     login: Sign In
@@ -357,11 +359,6 @@ en:
     body: You have some outstanding changes.  Please save or dismiss these changes to continue.
     save: Save Changes
     dismiss: Dismiss Changes
-
-  slug: &slug_attributes
-    slug: Slug
-    public_url: Public URL
-    is_slug_auto: Automatically generate Slug?
 
   linker:
     link_to_prefix: Link to
@@ -442,7 +439,6 @@ en:
     linked_to_assessment: Record cannot be deleted as it is linked to an assessment
 
   accession:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: Accession <strong>%{accession.display_string}</strong> created
@@ -462,7 +458,6 @@ en:
         save: Save Accession
 
   agent: &agent_attributes
-    <<: *slug_attributes
     _frontend:
       messages:
         created: Agent Created
@@ -496,31 +491,28 @@ en:
         add: Add Telephone Number
 
   agent_corporate_entity:
-    <<: *slug_attributes
     _frontend:
       action:
         save: Save Corporate Entity
 
   agent_family:
-    <<: *slug_attributes
     _frontend:
       action:
         save: Save Family
 
   agent_person:
-    <<: *slug_attributes
     _frontend:
       action:
         save: Save Person
 
   agent_software:
-    <<: *slug_attributes
     _frontend:
       action:
         save: Save Software
 
   archival_object:
-    <<: *slug_attributes
+    external_ark_url: External ARK URL
+    external_ark_url_tooltip: External ARK URL Tooltip
     _frontend:
       messages:
         created: Archival Object <strong>%{archival_object.display_string}</strong> on Resource <strong>%{resource.title}</strong> created
@@ -546,7 +538,6 @@ en:
         new_record_title: New Archival Object
 
   classification:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: "Classification <strong>%{classification.title}</strong> created"
@@ -562,7 +553,6 @@ en:
         add: Add Classification
 
   classification_term:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: "Classification Term <strong>%{classification_term.title}</strong> created"
@@ -612,7 +602,6 @@ en:
         add: Add Deaccession
 
   digital_object:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: "Digital Object <strong>%{digital_object.title}</strong> Created"
@@ -636,7 +625,6 @@ en:
         save: Save Digital Object
 
   digital_object_component:
-    <<: *slug_attributes
     _frontend:
       messages:
         created_with_parent: Digital Object Component <strong>%{digital_object_component.display_string}</strong> created as child of <strong>%{parent.display_string}</strong> on Digital Object <strong>%{digital_object.title}</strong>
@@ -724,6 +712,12 @@ en:
       action:
         add_digital_object: Add Digital Object
         add: Add Instance
+
+  lang_material:
+    _frontend:
+      action:
+        add: Add Language
+        add_note: Add Language Note
 
   linked_agent:
     _frontend:
@@ -836,7 +830,6 @@ en:
     oai_sets_available: Sets included in OAI
 
   repository:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: Repository Created
@@ -866,7 +859,6 @@ en:
         _plural: OAI Harvest Settings
 
   resource:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: "Resource <strong>%{resource.title}</strong> created"
@@ -891,6 +883,8 @@ en:
         create: Create Resource
         save: Save Resource
         delete_multiple: Delete Resources
+    external_ark_url: External ARK URL
+    external_ark_url_tooltip: Archival Resource Key (ARK) persistent identifier generated outside of ArchivesSpace. If this field has a value it takes precedence over an ARK generated within ArchivesSpace.
 
   preference:
     _frontend:
@@ -913,7 +907,6 @@ en:
     ref: Destination Repository
 
   subject:
-    <<: *slug_attributes
     _frontend:
       messages:
         created: Subject Created
@@ -967,6 +960,7 @@ en:
     column_label: Column
     sections:
       basic_information: Basic Information
+      language: Language
       date: Date
       extent: Extent
       instance: Instance
@@ -1047,9 +1041,9 @@ en:
   job:
     _frontend:
       audit_data: Audit Data
-      actions:
+      action:
         create: Create Job
-        save: Queue Job
+        save: Start Job
         new: New Background Job
         cancel: Cancel Job
         add_file: Add file
@@ -1069,6 +1063,7 @@ en:
         status_changed_canceled: The job has been canceled.
         no_active_jobs: There are no active jobs.
         no_archived_jobs: There are no archived jobs.
+        uploading: Uploading job...
         upload_successful: Upload Successful. Redirecting to Job page...
         import_type_missing: Please select an Import Type
         queue_position_next: This job is next in the queue.
@@ -1077,12 +1072,14 @@ en:
         find_and_replace_warning: Find and replace jobs can and will make major changes to your database. You are <strong>strongly</strong> advised to backup your database AND to run your job in a test instance before proceeding. There is no "undo".
         find_and_replace_instructions: Choose a base record to scope this find and replace operation. Then choose a record type to target and a property of that type. The operation will run in every target record in the tree of the base record, or in the base record itself if the target type is "Resource".
         report_instructions: Choose a report to run by using the <b>Select</b> button.
-        slug_lost_warning: <b>WARNING! </b>Any previously created slugs will be lost!
-        slug_generation: This job will generate a slug and enable slug autogeneration for all <b>Resources</b>, <b>Archival Objects</b>, <b>Digital Objects</b>, <b>Digital Object Components</b>, <b>Accessions</b>, <b>Classifications</b>, <b>Agents</b>, <b>Subjects</b>, and <b>Repositories</b>.
-        slug_config_msg: <b>Based on your ArchivesSpace configuration settings in config.rb:</b>
+        slug_lost_warning: <b>WARNING! </b> All auto-generated slugs will be regenerated! This job applies to all records across all repositories.
+        slug_generation: This job will generate slugs for all <b>Resources</b>, <b>Archival Objects</b>, <b>Digital Objects</b>, <b>Digital Object Components</b>, <b>Accessions</b>, <b>Classifications</b>, <b>Agents</b>, <b>Subjects</b>, and <b>Repositories</b> that do not already have a manually added slug. <br /><br /><em>Slugs that have been manually added will not be changed, unless the Automatically Generate Slug box on the record has been checked to indicate that the slug should be replaced.</em>
+        slug_config_msg: <b>Based on your configuration settings in config.rb:</b>
         slug_config_id: Slugs will be generated using the entity identifier where appropriate.
         slug_config_title: Slugs will be generated using the entity name or title.
         slug_config_eadid: Slugs for <b>Resources</b> will be generated using the EAD ID where appropriate.
+        slug_config_cuid: Slugs for <b>Archival Objects</b> will be generated using the Component Unique ID where appropriate.
+        ark_generation: This job will generate ARKs for all <b>Resources</b> and <b>Archival Objects</b> that do not already have an ARK. <br /><br /><em>External ARKs will not be changed.</em>
 
   shortcuts:
     quick_reference_window: "Quick Reference: Keyboard Shortcuts"
@@ -1211,16 +1208,17 @@ en:
         empty_false: "No"
         search: Search
         update_ils_holding_ids: Update ILS Holding IDs
-        update_ils_holding_ids_help: Enter a value for ILS Holding ID for all selected containers.
+        update_ils_holding_ids_help: Enter a value for ILS Holding ID for all selected containers.  Leave this blank to remove the current value without replacing it with another value.
         update_container_profiles: Update Container Profiles
-        update_container_profiles_help: Choose a Container Profile for all selected containers.
+        update_container_profiles_help: Choose a Container Profile for all selected containers.  Leave this blank to remove the current value without replacing it with another value.
         update_locations_singular: "Update Locations: Single Location"
-        update_locations_singular_help: Choose a Location for all selected containers.
+        update_locations_singular_help: Choose a Location for all selected containers.  Leave this blank to remove the current value without replacing it with another value.
         update_locations_multiple: "Update Locations: Multiple Locations"
-        update_locations_multiple_help: Choose a Location for each selected container.
+        update_locations_multiple_help: Choose a Location for each selected container.  Leave this blank to remove the current value without replacing it with another value.
         rapid_barcode_entry: Rapid Barcode Entry
         rapid_barcode_entry_existing_barcode: Existing Barcode
         rapid_barcode_entry_new_barcode: New Barcode
+        rapid_barcode_entry_help: Enter a barcode for each selected container.  Leave the New Barcode field blank to remove the current barcode without replacing it with a new value.
         batch_delete: Delete Top Containers
         batch_delete_help: Delete all selected containers.
         update_n_records: "Update %{n} records"
@@ -1433,6 +1431,9 @@ en:
         linked_via_assessment_records: Assessments
         linked_via_assessment_surveyed_by: Assessments - Surveyed By
         linked_via_assessment_reviewer: Assessments - Reviewer
+        record_type: Record Type
+        title: Title
+        identifier: Identifier
       ratings_list:
         rating: Rating
         score: Score

@@ -24,7 +24,7 @@
       Extra options for people who like lots of GC detail: -verbose:gc -XX:+PrintTenuringDistribution -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime
   -->
   <property name="env.JAVA_OPTS" value="" />
-  <property name="default_java_options" value="-XX:MaxPermSize=196m -Djava.security.egd=file:/dev/./urandom -Xmx1024m -Xss2m -Daspace.config.data_directory=${aspace.data_directory} -Dfile.encoding=UTF-8 -Daspace.config.search_user_secret=devserver -Daspace.config.public_user_secret=devserver -Daspace.config.staff_user_secret=devserver -Daspace.devserver=true -Daspace.config.frontend_cookie_secret=devserver -Daspace.config.public_cookie_secret=devserver -Daspace.config.solr_url=http://localhost:${aspace.solr.port}" />
+  <property name="default_java_options" value="-Djava.security.egd=file:/dev/./urandom -Xmx1024m -Xss2m -Daspace.config.data_directory=${aspace.data_directory} -Dfile.encoding=UTF-8 -Daspace.config.search_user_secret=devserver -Daspace.config.public_user_secret=devserver -Daspace.config.staff_user_secret=devserver -Daspace.devserver=true -Daspace.config.frontend_cookie_secret=devserver -Daspace.config.public_cookie_secret=devserver -Daspace.config.solr_url=http://localhost:${aspace.solr.port}" />
 
 
   <target name="help" description="This help">
@@ -84,7 +84,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="gems/bin/bundle install --gemfile='${gemfile}' --no-deployment ${bundle-without-option}" />
+      <arg line="gems/bin/bundle install --jobs=8 --gemfile='${gemfile}' --no-deployment ${bundle-without-option}" />
     </java>
   </target>
 
@@ -108,7 +108,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="-S gem install bundler -v 1.16.1" />
+      <arg line="-S gem install bundler -v 1.17.3" />
     </java>
 
     <antcall target="bundler">
@@ -116,7 +116,6 @@
       <param name="excluded-gem-groups" value="${excluded-gem-groups}" />
     </antcall>
     <antcall target="bundler"><param name="gemfile" value="../frontend/Gemfile" /></antcall>
-    <antcall target="bundler"><param name="gemfile" value="../selenium/Gemfile" /></antcall>
     <antcall target="bundler"><param name="gemfile" value="../_yard/Gemfile" /></antcall>
     <antcall target="bundler"><param name="gemfile" value="../public/Gemfile" /></antcall>
     <antcall target="bundler"><param name="gemfile" value="../indexer/Gemfile" /></antcall>
@@ -165,7 +164,7 @@
            from the current directory on principle (even when that current
            directory is on the classpath!).  Explicitly setting the load
            path fixes this test. -->
-      <arg line="--debug -I. ../build/gems/bin/rspec -P '*_spec.rb' --order rand:1 spec" />
+      <arg line="-I. ../build/gems/bin/rspec -P '*_spec.rb' --order rand:1 spec" />
     </java>
   </target>
 
@@ -192,7 +191,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec} ${plugin-spec-dirs}" />
+      <arg line="../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec} ${plugin-spec-dirs}" />
     </java>
   </target>
 
@@ -216,7 +215,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug -X-C ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} ${plugin-spec-dirs}" />
+      <arg line="-X-C ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} ${plugin-spec-dirs}" />
     </java>
   </target>
 
@@ -326,7 +325,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec}" />
+      <arg line="../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec}" />
     </java>
   </target>
 
@@ -371,8 +370,11 @@
   </target>
 
   <!-- Frontend -->
-  <target name="frontend:test" depends="set-classpath" description="Run the unit test suite">
+  <target name="frontend:test" depends="set-classpath, frontend:clean" description="Run the non-Selenium unit test suite">
     <property name="spec" value=""/>
+    <condition property="spec-arg" value="${spec}" else="">
+      <isset property="spec"/>
+    </condition>
     <property name="example" value=""/>
     <condition property="example-arg" value="-e &quot;${example}&quot;" else="">
       <isset property="example"/>
@@ -381,10 +383,11 @@
           failonerror="true"
           dir="../frontend">
       <jvmarg line="${default_java_options} ${env.JAVA_OPTS}"/>
+      <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
       <env key="GEM_HOME" value="${gem_home}" />
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
-      <arg line="--debug ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec}" />
+      <arg line="../build/gems/bin/rspec -b --format d -P '*/*_spec.rb' --order rand:1 ${example-arg} spec/${spec-arg}" />
     </java>
   </target>
 
@@ -406,17 +409,24 @@
       <env key="GEM_HOME" value="${gem_home}" />
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
-      <arg line="--debug ../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec}" />
+      <arg line="../build/gems/bin/rspec -b --format d -P '*_spec.rb' --order rand:1 ${example-arg} spec/${spec}" />
     </java>
   </target>
 
-  <target name="frontend:clean" description="Delete the Rails tmp directory">
+   <target name="frontend:clean" description="Delete the Rails tmp directory">
     <delete failonerror="false" dir="../frontend/tmp" />
     <delete failonerror="false" dir="../frontend/public/assets" />
     <mkdir dir="../frontend/public/assets" />
     <mkdir dir="../frontend/public/assets/00-do-not-put-things-here" />
   </target>
 
+  <target name="solr-db-delete" description="Delete the solr index, test database, and log files">
+    <delete failonerror="false" file="${aspace.data_directory}/frontend_test_log.out" />
+    <delete failonerror="false" file="${aspace.data_directory}/backend_test_log.out" />
+    <delete failonerror="false" file="${aspace.data_directory}/derby.log" />
+    <delete failonerror="false" dir="${aspace.data_directory}/archivesspace_demo_db" />
+    <antcall target="solr:nuke" />
+  </target>
 
   <target name="frontend:devserver" depends="set-classpath, frontend:clean" description="Start an instance of the ArchivesSpace frontend development server">
     <condition property="rails.env" value="test" else="development">
@@ -478,32 +488,6 @@
     </java>
   </target>
 
-
-  <!-- Selenium -->
-  <!-- !! Replaced with selenium:staff !! see below -->
-  <target name="selenium:test" depends="set-classpath, frontend:clean" description="Run the Selenium tests">
-    <property name="spec" value=""/>
-    <property name="example" value=""/>
-    <condition property="example-arg" value="-e &quot;${example}&quot;" else="">
-      <isset property="example"/>
-    </condition>
-    <dirset id="plugins" dir="../plugins">
-      <include name="**/selenium"/>
-    </dirset>
-    <pathconvert pathsep=" " property="plugin-selenium-dirs" refid="plugins"/>
-
-    <java classpath="${jruby_classpath}" classname="org.jruby.Main" fork="true"
-          failonerror="true"
-          dir="../selenium">
-      <jvmarg line="${default_java_options} ${env.JAVA_OPTS} -XX:MaxPermSize=96m"/>
-      <env key="GEM_HOME" value="${gem_home}" />
-      <env key="GEM_PATH" value="" />
-      <env key="BUNDLE_PATH" value="${gem_home}" />
-      <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug ../build/gems/bin/rspec -P '*_spec.rb' --order default -f d  ${example-arg} spec/${spec} ${plugin-selenium-dirs}" />
-    </java>
-  </target>
-
   <target name="frontend:selenium" depends="set-classpath, frontend:clean" description="Run the Selenium tests">
     <property name="spec" value=""/>
     <property name="example" value=""/>
@@ -514,62 +498,20 @@
       <include name="**/selenium"/>
     </dirset>
     <pathconvert pathsep=" " property="plugin-selenium-dirs" refid="plugins"/>
-
     <java classpath="${jruby_classpath}" classname="org.jruby.Main" fork="true"
           failonerror="true"
           dir="../frontend/spec/selenium">
-      <jvmarg line="${default_java_options} ${env.JAVA_OPTS} -XX:MaxPermSize=96m"/>
+      <jvmarg line="${default_java_options} ${env.JAVA_OPTS}"/>
       <env key="GEM_HOME" value="${gem_home}" />
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug ../../../build/gems/bin/rspec -P '*_spec.rb' --order default -f d  ${example-arg} spec/${spec} ${plugin-selenium-dirs}" />
-    </java>
-  </target>
-
-  <target name="plugin:selenium:test" depends="set-classpath, frontend:clean" description="Run the Selenium tests">
-    <property name="spec" value=""/>
-    <property name="example" value=""/>
-    <condition property="example-arg" value="-e &quot;${example}&quot;" else="">
-      <isset property="example"/>
-    </condition>
-    <dirset id="plugins" dir="../..">
-      <include name="archivesspace/plugins/**/selenium"/>
-      <include name="**/selenium"/>
-    </dirset>
-    <pathconvert pathsep=" " property="plugin-selenium-dirs" refid="plugins"/>
-
-    <java classpath="${jruby_classpath}" classname="org.jruby.Main" fork="true"
-          failonerror="true"
-          dir="../selenium">
-      <jvmarg line="${default_java_options} ${env.JAVA_OPTS} -XX:MaxPermSize=96m"/>
-      <env key="GEM_HOME" value="${gem_home}" />
-      <env key="GEM_PATH" value="" />
-      <env key="BUNDLE_PATH" value="${gem_home}" />
-      <env key="COVERAGE_REPORTS" value="${COVERAGE_REPORTS}" />
-      <arg line="--debug ../build/gems/bin/rspec -P '*_spec.rb' --order default -f d  ${example-arg} ${plugin-selenium-dirs}" />
+      <arg line="../../../build/gems/bin/rspec -b -f d -P '*_spec.rb' --order default ${example-arg} spec/${spec} ${plugin-selenium-dirs}" />
     </java>
   </target>
 
 
   <!-- TODO: add plugin support -->
-  <target name="selenium:staff" depends="set-classpath, frontend:clean" description="Run integration tests on the staff UI">
-    <property name="cores" value="2"/>
-    <property name="groups" value=""/>
-    <condition property="only-group-arg" value="only_group=${groups}" else="">
-      <length string="${groups}"
-              when="gt" length="0" />
-    </condition>
-    <java classpath="${jruby_classpath}" classname="org.jruby.Main" fork="true"
-          failonerror="true"
-          dir="../selenium">
-      <jvmarg line="${default_java_options} ${env.JAVA_OPTS}"/>
-      <env key="GEM_HOME" value="${gem_home}" />
-      <env key="GEM_PATH" value="" />
-      <env key="BUNDLE_PATH" value="${gem_home}" />
-      <arg line="-S rake integration:staff cores=${cores} ${only-group-arg}" />
-    </java>
-  </target>
 
 
   <target name="doc:yard" depends="set-classpath" description="Generate the full YARD documentation">
@@ -658,22 +600,25 @@
     <antcall target="db:nuke"/>
   </target>
 
-  <target name="travis:selenium" depends="set-classpath, bootstrap">
-    <antcall target="db:migrate" />
-    <antcall target="selenium:test" />
-    <antcall target="travis:db:nuke" />
-  </target>
-
-  <!-- ^- Replaced by -v -->
-
-  <target name="travis:selenium:staff" depends="set-classpath, bootstrap">
-    <antcall target="db:migrate" />
-    <antcall target="selenium:staff" />
-  </target>
-
   <target name="travis:test" depends="set-classpath, bootstrap">
     <antcall target="db:migrate" />
     <antcall target="headless-tests" />
+    <antcall target="travis:db:nuke" />
+  </target>
+
+  <target name="travis:other:test" depends="set-classpath, bootstrap">
+    <antcall target="db:migrate" />
+    <antcall target="backend:integration" />
+    <antcall target="backend:test" />
+    <antcall target="indexer:test" />
+    <antcall target="common:test" />
+    <antcall target="travis:db:nuke" />
+  </target>
+
+  <target name="travis:rails:test" depends="set-classpath, bootstrap">
+    <antcall target="db:migrate" />
+    <antcall target="frontend:test"/>
+    <antcall target="public:test" />
     <antcall target="travis:db:nuke" />
   </target>
 
@@ -826,12 +771,16 @@
 
     <antcall target="set-classpath" />
     <antcall target="bootstrap"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="oai:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="backend:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="frontend:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="public:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="solr:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
-    <antcall target="indexer:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+
+    <parallel>
+      <antcall target="oai:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+      <antcall target="backend:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+      <antcall target="frontend:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+      <antcall target="public:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+      <antcall target="solr:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+      <antcall target="indexer:war"><param name="excluded-gem-groups" value="test development doc" /></antcall>
+    </parallel>
+
     <antcall target="build-zip"><param name="excluded-gem-groups" value="test development doc" /></antcall>
   </target>
 
@@ -844,7 +793,9 @@
   <target name="indexer:coverage" depends="set-classpath, indexer:test" description="Generate coverage reports for the indexer">
   </target>
 
-  <target name="frontend:coverage" depends="set-classpath, frontend:clean, selenium:test"
+  <!-- Note: Selenium tests for frontend are not currently included
+   in coverage reports -->
+  <target name="frontend:coverage" depends="set-classpath, frontend:clean, frontend:test"
           description="Generate coverage reports for the frontend">
   </target>
 
@@ -853,7 +804,7 @@
   </target>
 
 
-  <target name="test" depends="headless-tests, selenium:staff"
+  <target name="test" depends="headless-tests, frontend:selenium"
           description="Run the full suite of tests">
   </target>
 
@@ -902,6 +853,9 @@
 
   <target name="public:test" depends="set-classpath, public:copy-shared-resources" description="Run the unit test suite">
     <property name="spec" value=""/>
+    <condition property="spec-arg" value="${spec}" else="">
+      <isset property="spec"/>
+    </condition>
     <property name="example" value=""/>
     <condition property="example-arg" value="-e &quot;${example}&quot;" else="">
       <isset property="example"/>
@@ -914,7 +868,7 @@
       <env key="GEM_HOME" value="${gem_home}" />
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
-      <arg line="--debug ../build/gems/bin/rspec -b --format d --order rand:1 ${example-arg}" />
+      <arg line="../build/gems/bin/rspec -b --format d --order rand:1 ${example-arg} spec/${spec-arg}" />
     </java>
   </target>
 
@@ -940,7 +894,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="gems/bin/rubocop  ../public" />
+      <arg line="gems/bin/rubocop --safe-auto-correct ../public" />
     </java>
   </target>
 
@@ -952,11 +906,11 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="gems/bin/rubocop ../backend" />
+      <arg line="gems/bin/rubocop --safe-auto-correct ../backend" />
     </java>
   </target>
 
-  <target name="staff:cop" depends="set-classpath" description="Run rubocop against staff interface" >
+  <target name="frontend:cop" depends="set-classpath" description="Run rubocop against staff interface" >
     <property name="build.home" location="."/>
     <java classpath="${jruby_classpath}" classname="org.jruby.Main" fork="true" failonerror="true">
       <jvmarg line="${default_java_options} ${env.JAVA_OPTS}"/>
@@ -964,7 +918,7 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="gems/bin/rubocop ../frontend" />
+      <arg line="gems/bin/rubocop --safe-auto-correct ../frontend" />
     </java>
   </target>
 
@@ -976,10 +930,16 @@
       <env key="GEM_PATH" value="" />
       <env key="BUNDLE_PATH" value="${gem_home}" />
       <env key="HOME" value="${build.home}" />
-      <arg line="gems/bin/rubocop ../indxer" />
+      <arg line="gems/bin/rubocop --safe-auto-correct ../indexer" />
     </java>
   </target>
 
+  <target name="all:cops" description="Run Rubocop on major components">
+    <antcall target="indexer:cop" />
+    <antcall target="frontend:cop" />
+    <antcall target="backend:cop"/>
+    <antcall target="public:cop"/>
+  </target>
 
 
   <!-- Packaging -->

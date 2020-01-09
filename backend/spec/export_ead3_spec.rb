@@ -11,7 +11,7 @@ describe "EAD3 export mappings" do
   def load_export_fixtures
     @agents = {}
     5.times {
-      a = create([:json_agent_person, :json_agent_corporate_entity, :json_agent_family].sample)
+      a = create([:json_agent_person, :json_agent_corporate_entity, :json_agent_family].sample, :publish => true)
       @agents[a.uri] = a
     }
 
@@ -96,6 +96,9 @@ describe "EAD3 export mappings" do
                  :parent => parent ? {:ref => parent} : nil,
                  :notes => build_archival_object_notes(5),
                  :linked_agents => build_linked_agents(@agents),
+                 :lang_materials => [build(:json_lang_material),
+                                     build(:json_lang_material),
+                                     build(:json_lang_material_with_note)],
                  :instances => [build(:json_instance_digital),
                                 build(:json_instance,
                                       :sub_container => build(:json_sub_container,
@@ -208,7 +211,11 @@ describe "EAD3 export mappings" do
       as_test_user("admin") do
         DB.open(true) do
           load_export_fixtures
+          AppConfig[:arks_enabled] = true
           @doc = get_xml("/repositories/#{$repo_id}/resource_descriptions/#{@resource.id}.xml?include_unpublished=true&include_daos=true&ead3=true")
+          AppConfig[:arks_enabled] = false
+          @doc_ark_disabled = get_xml("/repositories/#{$repo_id}/resource_descriptions/#{@resource.id}.xml?include_unpublished=true&include_daos=true")
+          AppConfig[:arks_enabled] = true
           @doc_nsless = Nokogiri::XML::Document.parse(@doc.to_xml)
           @doc_nsless.remove_namespaces!
           raise Sequel::Rollback
@@ -247,7 +254,9 @@ describe "EAD3 export mappings" do
     end
 
     it "maps resource.ead_location to recordid/@instanceurl" do
-      mt(@resource.ead_location, "control/recordid", 'instanceurl')
+      if !AppConfig[:arks_enabled]
+        mt(@resource.ead_location, "control/recordid", 'instanceurl')
+      end
     end
 
     it "maps resource.finding_aid_title to filedesc/titlestmt/titleproper" do
@@ -391,8 +400,12 @@ describe "EAD3 export mappings" do
     end
 
 
-    it "maps resource.finding_aid_language to profiledesc/language" do
-      mt(@resource.finding_aid_language, "control/languagedeclaration/language")
+    it "maps resource finding_aid_language fields to languagedeclaration fields" do
+      mt(I18n.t("enumerations.language_iso639_2.#{@resource.finding_aid_language}"), "control/languagedeclaration/language")
+      mt(@resource.finding_aid_language, "control/languagedeclaration/language", 'langcode')
+      mt(I18n.t("enumerations.script_iso15924.#{@resource.finding_aid_script}"), "control/languagedeclaration/script")
+      mt(@resource.finding_aid_script, "control/languagedeclaration/script", 'scriptcode')
+      mt(@resource.finding_aid_language_note, "control/languagedeclaration/descriptivenote")
     end
 
 
@@ -415,15 +428,21 @@ describe "EAD3 export mappings" do
       end
     end
 
-    it "maps {archival_object}.language to {desc_path}/did/langmaterial/language" do
-      data = object.language ? translate('enumerations.language_iso639_2', object.language) : nil
-      code = object.language
+    it "maps {archival_object}.lang_materials to {desc_path}/did/langmaterial" do
+      language = object.lang_materials[0]['language_and_script']['language']
+      script = object.lang_materials[0]['language_and_script']['script']
+      language_notes = object.lang_materials.map {|l| l['notes']}.compact.reject {|e|  e == [] }.flatten
 
-      mt(data, "#{desc_path}/did/langmaterial/language")
-      mt(code, "#{desc_path}/did/langmaterial/language", 'langcode')
+      mt(translate('enumerations.language_iso639_2', language), "#{desc_path}/did/langmaterial/languageset/language")
+      mt(language, "#{desc_path}/did/langmaterial/languageset/language", 'langcode')
+      mt(translate('enumerations.script_iso15924', script), "#{desc_path}/did/langmaterial/languageset/script")
+      mt(script, "#{desc_path}/did/langmaterial/languageset/script", 'scriptcode')
+
+      language_notes.select {|n| n['type'] == 'langmaterial'}.each_with_index do |note, i|
+        mt(note_content(note), "#{desc_path}/did/langmaterial/descriptivenote")
+      end
+
     end
-
-
 
 
     describe "How {archival_object}.instances[].sub_container data is mapped." do
@@ -613,8 +632,9 @@ describe "EAD3 export mappings" do
         end
       end
 
-
-       it "maps notes of type 'dimensions' to did/physdesc" do
+      # This is not appropriate EAD3 via http://eadiva.com/physdesc/ which states:
+      # More importantly, much of [physdec's] functionality was moved to <physdescstructured> and it was left with only generic elements. It may not longer contain <dimensions>, <extent>, or <physfacet>.
+       xit "maps notes of type 'dimensions' to did/physdesc" do
          notes.select {|n| n['type'] == 'dimensions'}.each_with_index do |note, i|
            content = note_content(note)
            path = "#{desc_path}/did/physdesc[text()='#{content}']"
@@ -624,7 +644,7 @@ describe "EAD3 export mappings" do
            else
              mt(nil, path, "id")
            end
-           
+
           mt(note['label'], path, "label") if note['label']
          end
        end
@@ -644,8 +664,9 @@ describe "EAD3 export mappings" do
         end
       end
 
-
-      it "maps notes of type 'physfacet' to did/physdesc" do
+      # This is not appropriate EAD3 via http://eadiva.com/physdesc/ which states:
+      # More importantly, much of [physdec's] functionality was moved to <physdescstructured> and it was left with only generic elements. It may not longer contain <dimensions>, <extent>, or <physfacet>.
+      xit "maps notes of type 'physfacet' to did/physdesc" do
         notes.select {|n| n['type'] == 'physfacet'}.each_with_index do |note, i|
           content = note_content(note)
           path = "#{desc_path}/did/physdesc[text()='#{content}']"
@@ -1335,7 +1356,7 @@ describe "EAD3 export mappings" do
     def get_xml_doc(include_unpublished = false)
       as_test_user("admin") do
         DB.open(true) do
-          doc_for_unpublished_resource = get_xml("/repositories/#{$repo_id}/resource_descriptions/#{@unpublished_resource_jsonmodel.id}.xml?include_unpublished=#{include_unpublished}&include_daos=true", true)
+          doc_for_unpublished_resource = get_xml("/repositories/#{$repo_id}/resource_descriptions/#{@unpublished_resource_jsonmodel.id}.xml?include_unpublished=#{include_unpublished}&include_daos=true&ead3=true", true)
 
           doc_nsless_for_unpublished_resource = Nokogiri::XML::Document.parse(doc_for_unpublished_resource)
           doc_nsless_for_unpublished_resource.remove_namespaces!
@@ -1354,7 +1375,19 @@ describe "EAD3 export mappings" do
         end
 
         unpublished_resource = create(:json_resource,
-                                      :publish => false)
+                                      :publish => false,
+                                      :revision_statements => [
+                                        {
+                                          :date => 'some date',
+                                          :description => 'unpublished revision statement',
+                                          :publish => false
+                                        },
+                                        {
+                                          :date => 'some date',
+                                          :description => 'published revision statement',
+                                          :publish => true
+                                        }
+                                      ])
 
         @unpublished_resource_jsonmodel = JSONModel(:resource).find(unpublished_resource.id)
 
@@ -1392,6 +1425,34 @@ describe "EAD3 export mappings" do
 
       item = items.first
       expect(item).not_to have_attribute('audience', 'internal')
+    end
+
+    it "include the unpublished revision statement with audience internal when include_unpublished is true" do
+      revision_statements = @xml_including_unpublished.xpath('//maintenancehistory/maintenanceevent')
+      expect(revision_statements.length).to eq(3)
+      unpublished = revision_statements[1]
+      expect(unpublished).to have_attribute('audience', 'internal')
+      items = @xml_including_unpublished.xpath('//maintenancehistory/maintenanceevent/eventdescription')
+      expect(items.length).to eq(3)
+      expect(items[1]).to have_inner_text('unpublished revision statement')
+    end
+
+    it "does not set <change> attribute audience 'internal' when revision statement is published" do
+      revision_statements = @xml_including_unpublished.xpath('//control/maintenancehistory/maintenanceevent')
+      expect(revision_statements.length).to eq(3)
+      published = revision_statements[2]
+      expect(published).not_to have_attribute('audience', 'internal')
+      items = @xml_including_unpublished.xpath('//maintenancehistory/maintenanceevent/eventdescription')
+      expect(items.length).to eq(3)
+      expect(items[2]).to have_inner_text('published revision statement')
+    end
+
+    it "includes only the published revision statement when include_unpublished is false" do
+      revision_statements = @xml_not_including_unpublished.xpath('//maintenancehistory/maintenanceevent')
+      expect(revision_statements.length).to eq(2)
+      items = @xml_not_including_unpublished.xpath('//maintenancehistory/maintenanceevent/eventdescription')
+      expect(items.length).to eq(2)
+      expect(items[1]).to have_inner_text('published revision statement')
     end
   end
 

@@ -72,7 +72,7 @@ describe 'Solr model' do
     expect(http.request.body).to match(/hello\+world/)
     expect(http.request.body).to match(/wt=json/)
     expect(http.request.body).to match(/suppressed%3Afalse/)
-    expect(http.request.body).to match(/fq=types%3A%28]?%22optional_record_type/)
+    expect(http.request.body).to match(/fq=types%3A%28?%22optional_record_type/)
     expect(http.request.body).to match(/-id%3A%28%22alpha%22\+OR\+%22omega/)
     expect(http.request.body).to match(/hl=true/)
     expect(http.request.body).to match(/bq=title%3A%22hello\+world%22\*/)
@@ -179,6 +179,14 @@ describe 'Solr model' do
       url = query.to_solr_url
       expect(url.query).to include('&q.op=AND')
     end
+
+    it 'handles params with array values by passing the param multiple times' do
+        AppConfig[:solr_params] = { "bq" => ["one", proc {"two"}]}
+        url = query.to_solr_url
+        expect(url.query).to include('&bq=one')
+        expect(url.query).to include('&bq=two')
+    end
+
   end
 
 end

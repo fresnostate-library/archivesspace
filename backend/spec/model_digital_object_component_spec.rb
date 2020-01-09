@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'securerandom'
+require_relative 'spec_slugs_helper'
 
 describe 'DigitalObjectComponent model' do
 
@@ -12,129 +13,93 @@ describe 'DigitalObjectComponent model' do
   end
 
   describe "slug tests" do
-    it "autogenerates a slug via title when configured to generate by name" do
-      AppConfig[:auto_generate_slugs_with_id] = false
-
-      digital_object = DigitalObjectComponent.create_from_json(build(:json_digital_object_component))
-
-
-      digital_object_rec = DigitalObjectComponent.where(:id => digital_object[:id]).first.update(:is_slug_auto => 1)
-
-      expected_slug = digital_object_rec[:title].gsub(" ", "_")
-                                           .gsub(/[&;?$<>#%{}|\\^~\[\]`\/@=:+,!]/, "")
-
-      expect(digital_object_rec[:slug]).to eq(expected_slug)
+    before(:all) do
+      AppConfig[:use_human_readable_urls] = true
     end
 
-    it "autogenerates a slug via digital_object_id when configured to generate by id" do
-      AppConfig[:auto_generate_slugs_with_id] = true
+    describe "slug autogen enabled" do
+      describe "by name" do
+        before(:all) do
+          AppConfig[:auto_generate_slugs_with_id] = false
+        end
+        it "autogenerates a slug via title" do
+          digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :title => rand(100000).to_s))
+          expected_slug = clean_slug(digital_object_component[:title])
+          expect(digital_object_component[:slug]).to eq(expected_slug)
+        end
+        it "cleans slug" do
+          digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :title => "Foo Bar Baz&&&&"))
+          expect(digital_object_component[:slug]).to eq("foo_bar_baz")
+        end
 
-      digital_object = DigitalObjectComponent.create_from_json(build(:json_digital_object_component))
-
-
-      digital_object_rec = DigitalObjectComponent.where(:id => digital_object[:id]).first.update(:is_slug_auto => 1)
-
-      expected_slug = digital_object_rec[:component_id].gsub(" ", "_")
-                                                .gsub(/[&;?$<>#%{}|\\^~\[\]`\/@=:+,!]/, "")
-                                                .gsub('"', '')
-                                                .gsub('null', '')
-
-      # numeric slugs will be prepended by an underscore
-      if expected_slug =~ /^\d+$/
-        expected_slug = "_#{expected_slug}"
+        it "dedupes slug" do
+          digital_object_component1 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :title => "foo"))
+          digital_object_component2 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :title => "foo"))
+          expect(digital_object_component1[:slug]).to eq("foo")
+          expect(digital_object_component2[:slug]).to eq("foo_1")
+        end
+        it "turns off autogen if slug is blank" do
+          digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true))
+          digital_object_component.update(:slug => "")
+          expect(digital_object_component[:is_slug_auto]).to eq(0)
+        end
       end
+      describe "by id" do
+        before(:all) do
+          AppConfig[:auto_generate_slugs_with_id] = true
+        end
+        it "autogenerates a slug via identifier" do
+          digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true))
+          expected_slug = clean_slug(digital_object_component[:component_id])
+          expect(digital_object_component[:slug]).to eq(expected_slug)
+        end
+        it "cleans slug" do
+          digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :component_id => "Foo Bar Baz&&&&"))
+          expect(digital_object_component[:slug]).to eq("foo_bar_baz")
+        end
 
-      expect(digital_object_rec[:slug]).to eq(expected_slug)
-    end
-
-    it "generates a slug for largetree if use_human_readable_URLs is set to true" do
-      AppConfig[:use_human_readable_URLs] = true
-
-      expect(SlugHelpers.get_slugged_url_for_largetree("DigitalObjectComponent", $repo_id, "doc_slug")).to eq( AppConfig[:public_proxy_url] + "/digital_object_components/doc_slug")
-    end
-
-    it "does not generate a slug for largetree if use_human_readable_URLs is set to false" do
-      AppConfig[:use_human_readable_URLs] = false
-
-      expect(SlugHelpers.get_slugged_url_for_largetree("DigitalObjectComponent", $repo_id, "doc_slug").empty?).to eq( true )
-    end
-
-    describe "slug code does not run" do
-      it "does not execute slug code when auto-gen on id and title is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = true
-
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => true}))
-
-        expect(digital_object_component).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-
-        digital_object_component.update(:title => "foobar")
+        it "dedupes slug" do
+          digital_object_component1 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :component_id => "foo"))
+          digital_object_component2 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => true, :component_id => "foo#"))
+          expect(digital_object_component1[:slug]).to eq("foo")
+          expect(digital_object_component2[:slug]).to eq("foo_1")
+        end
       end
+    end
 
-      it "does not execute slug code when auto-gen on title and id is changed" do
+    describe "slug autogen disabled" do
+      before(:all) do
         AppConfig[:auto_generate_slugs_with_id] = false
-
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => true}))
-
-        expect(digital_object_component).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-
-        digital_object_component.update(:component_id => "foobar")
+      end
+      it "slug does not change when config set to autogen by title and title updated" do
+        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => false, :slug => "foo"))
+        digital_object_component.update(:title => rand(100000000))
+        expect(digital_object_component[:slug]).to eq("foo")
       end
 
-      it "does not execute slug code when auto-gen off and title, identifier changed" do
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => false}))
-
-        expect(digital_object_component).to_not receive(:auto_gen_slug!)
-        expect(SlugHelpers).to_not receive(:clean_slug)
-
-        digital_object_component.update(:component_id => "foobar")
-        digital_object_component.update(:title => "barfoo")
+      it "slug does not change when config set to autogen by id and id updated" do
+        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => false, :slug => "foo"))
+        digital_object_component.update(:component_id => rand(100000000))
+        expect(digital_object_component[:slug]).to eq("foo")
       end
     end
 
-    describe "slug code runs" do
-      it "executes slug code when auto-gen on id and id is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = true
-
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => true}))
-
-        expect(digital_object_component).to receive(:auto_gen_slug!)
-        expect(SlugHelpers).to receive(:clean_slug)
-
-        pending("no idea why this is failing. Testing this manually in app works as expected")
-
-        digital_object_component.update(:component_id => "foo#{rand(10000)}")
+    describe "manual slugs" do
+      it "cleans manual slugs" do
+        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => false))
+        digital_object_component.update(:slug => "Foo Bar Baz ###")
+        expect(digital_object_component[:slug]).to eq("foo_bar_baz")
       end
 
-      it "executes slug code when auto-gen on title and title is changed" do
-        AppConfig[:auto_generate_slugs_with_id] = false
+      it "dedupes manual slugs" do
+        digital_object_component1 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => false, :slug => "foo"))
+        digital_object_component2 = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, :is_slug_auto => false))
 
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => true}))
+        digital_object_component2.update(:slug => "foo")
 
-        expect(digital_object_component).to receive(:auto_gen_slug!)
-
-        digital_object_component.update(:title => "foobar")
-      end
-
-      it "executes slug code when autogen is turned on" do
-        AppConfig[:auto_generate_slugs_with_id] = false
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => false}))
-
-        expect(digital_object_component).to receive(:auto_gen_slug!)
-
-        digital_object_component.update(:is_slug_auto => 1)
-      end
-
-      it "executes slug code when autogen is off and slug is updated" do
-        digital_object_component = DigitalObjectComponent.create_from_json(build(:json_digital_object_component, {:is_slug_auto => false}))
-
-        expect(SlugHelpers).to receive(:clean_slug)
-
-        digital_object_component.update(:slug => "snow white")
+        expect(digital_object_component1[:slug]).to eq("foo")
+        expect(digital_object_component2[:slug]).to eq("foo_1")
       end
     end
-
   end
-
 end

@@ -1,3 +1,13 @@
 AllCops:
   Exclude:
-    - build/**
+    - build/**/*
+    - docs/**/*
+
+Style/Documentation:
+  Enabled: false
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+Style/WordArray:
+  EnforcedStyle: brackets

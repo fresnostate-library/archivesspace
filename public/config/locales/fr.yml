@@ -61,6 +61,7 @@ fr:
   page_actions: Page Actions
 
   request:
+    email_header: Merci pour votre requête
     required: obligatoire
     user_name: Votre nom
     user_email: Votre adresse email
@@ -328,6 +329,7 @@ fr:
       header:
        dates: Dates
        lang: Langue
+       script: Scénario
        physdesc: Description physique
        storage: Information de conditionnement
        access: Conditions d'accès
@@ -359,7 +361,8 @@ fr:
       identifier: Identifiant
       extent: Volume
       dates: Dates
-      lang: Langue
+      lang: Langue des matériaux
+      script: Scénario
       digital_object: Objet numérique
       physdesc: Description physique
       storage: Info conditionnement
@@ -381,6 +384,8 @@ fr:
         description_rules: Règles de description
         identifier: Identifiant
         language: Langue de description
+        script: Script de description
+        language_note: Langue de la note de description
         sponsor: Sponsor
         edition_statement: Mention d'édition
         series_statement: Mention de série
@@ -1915,12 +1920,6 @@ fr:
       novalue: Aucune valeur définie
     user_defined_enum_4:
       novalue: Aucune valeur définie
-    job_type:
-      print_to_pdf_job: Imprimer en PDF
-      import_job: Importer données
-      find_and_replace_job: Rechercher et remplacer en masse (Bêta)
-      report_job: Rapports
-      container_conversion_job: Rapports
     dimension_units:
       inches: Inches
       feet: Feet
